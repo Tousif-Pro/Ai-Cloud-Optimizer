@@ -15,6 +15,7 @@ import NotFound from "@/pages/NotFound";
 import CloudCostOptimizer from "@/pages/CloudCostOptimizer";
 import EmployeeProductivity from "@/pages/EmployeeProductivity";
 import GrowthEngine from "@/pages/GrowthEngine";
+import ClientCRM from "@/pages/ClientCRM";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/cloud-optimizer" element={<CloudCostOptimizer />} />
             <Route path="/employee-productivity" element={<EmployeeProductivity />} />
             <Route path="/growth-engine" element={<GrowthEngine />} />
+            <Route path="/client-crm" element={<ClientCRM />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AppLayout>

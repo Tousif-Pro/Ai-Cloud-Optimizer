@@ -4,7 +4,12 @@ import { MetricChart } from "@/components/dashboard/MetricChart";
 import { CompetitorTracker } from "@/components/dashboard/CompetitorTracker";
 import { ResourceAllocation } from "@/components/dashboard/ResourceAllocation";
 import { TrendInsight } from "@/components/dashboard/TrendInsight";
-import { ChartBar, Users, Database, Search } from "lucide-react";
+import { ChartBar, Users, Database, Search, Stars, BrainCircuit } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AIInsightPanel } from "@/components/dashboard/AIInsightPanel";
+import { ClientSpotlight } from "@/components/dashboard/ClientSpotlight";
+import { useState } from "react";
+import { toast } from "sonner";
 
 // Sample data for charts
 const revenueData = [
@@ -97,17 +102,84 @@ const trendData = [
   },
 ];
 
+// Featured clients data
+const featuredClients = [
+  {
+    id: 1,
+    name: "TechNova Solutions",
+    logo: "🏢",
+    industry: "Enterprise Software",
+    revenue: "$3.2M",
+    status: "growing",
+    lastInteraction: "2 days ago",
+    satisfaction: 92,
+    upcoming: {
+      title: "Quarterly Strategy Review",
+      date: "Jul 28, 2023",
+    },
+    notes: "Looking to expand AI integration across their product line. High potential for upselling.",
+  },
+  {
+    id: 2,
+    name: "MediCore Innovations",
+    logo: "🏥",
+    industry: "Healthcare",
+    revenue: "$1.8M",
+    status: "stable",
+    lastInteraction: "1 week ago",
+    satisfaction: 86,
+    upcoming: {
+      title: "Product Demo - New Module",
+      date: "Aug 5, 2023",
+    },
+    notes: "Regulatory compliance is a top concern. Need to emphasize our security features.",
+  },
+  {
+    id: 3,
+    name: "GreenPath Logistics",
+    logo: "🚚",
+    industry: "Transportation",
+    revenue: "$2.4M",
+    status: "at risk",
+    lastInteraction: "3 weeks ago",
+    satisfaction: 71,
+    upcoming: {
+      title: "Renewal Discussion",
+      date: "Jul 31, 2023",
+    },
+    notes: "Experiencing budget constraints. Prepare retention plan with scaled pricing options.",
+  },
+];
+
 export default function Dashboard() {
+  const [showAIInsights, setShowAIInsights] = useState(false);
+
+  const handleGenerateInsights = () => {
+    setShowAIInsights(true);
+    toast.success("AI analysis complete! New strategic insights generated.");
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight gradient-text inline-block mb-2">
-          Business Evolution Dashboard
-        </h1>
-        <p className="text-muted-foreground">
-          Real-time analytics and insights to drive your AI company forward
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight gradient-text inline-block mb-2">
+            Business Evolution Dashboard
+          </h1>
+          <p className="text-muted-foreground">
+            Real-time analytics and insights to drive your AI company forward
+          </p>
+        </div>
+        <Button 
+          onClick={handleGenerateInsights}
+          className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+        >
+          <BrainCircuit className="mr-2 h-4 w-4" />
+          Generate AI Insights
+        </Button>
       </div>
+
+      {showAIInsights && <AIInsightPanel />}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
@@ -159,6 +231,18 @@ export default function Dashboard() {
         <CompetitorTracker competitors={competitors} />
         <ResourceAllocation data={resourceAllocationData} />
         <TrendInsight trends={trendData} />
+      </div>
+
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4 flex items-center">
+          <Stars className="mr-2 h-5 w-5 text-yellow-500" />
+          Client Spotlight
+        </h2>
+        <div className="grid gap-4 md:grid-cols-3">
+          {featuredClients.map((client) => (
+            <ClientSpotlight key={client.id} client={client} />
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -11,7 +11,20 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { ChartBar, Database, Search, Users, Lightbulb, Cog, Cloud, Target, Rocket, Zap } from "lucide-react";
+import { 
+  ChartBar, 
+  Database, 
+  Search, 
+  Users, 
+  Lightbulb, 
+  Cog, 
+  Cloud, 
+  Target, 
+  Rocket, 
+  Zap, 
+  UserSquare, 
+  BrainCircuit 
+} from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 // Menu items for the sidebar
@@ -20,6 +33,12 @@ const menuItems = [
     title: "Dashboard",
     path: "/",
     icon: ChartBar,
+  },
+  {
+    title: "Client CRM",
+    path: "/client-crm",
+    icon: UserSquare,
+    highlight: true
   },
   {
     title: "Market Analysis",
@@ -45,7 +64,6 @@ const menuItems = [
     title: "Growth Engine",
     path: "/growth-engine",
     icon: Rocket,
-    highlight: true
   },
   {
     title: "Trend Predictions",
@@ -72,7 +90,7 @@ export function AppSidebar() {
       <SidebarHeader className="p-4">
         <div className="flex items-center space-x-2">
           <div className="h-8 w-8 rounded-full bg-gradient-to-br from-evolve-blue-500 via-evolve-purple-500 to-evolve-teal-500 flex items-center justify-center">
-            <span className="text-white font-bold">E</span>
+            <BrainCircuit className="h-4 w-4 text-white" />
           </div>
           <div className="font-bold text-xl text-sidebar-foreground">
             <span className="text-evolve-purple-500">Evolve</span>
@@ -109,7 +127,7 @@ export function AppSidebar() {
       <SidebarFooter className="px-4 py-4">
         <div className="flex flex-col space-y-2">
           <div className="text-xs text-sidebar-foreground/70">
-            Powered by AI • Version 1.2
+            Powered by AI • Version 2.0
           </div>
         </div>
       </SidebarFooter>
