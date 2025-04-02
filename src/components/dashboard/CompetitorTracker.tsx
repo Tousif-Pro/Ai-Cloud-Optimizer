@@ -1,54 +1,49 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
-interface Competitor {
+type Competitor = {
   name: string;
-  marketShare: number;
-  growth: number;
+  value: number;
   color: string;
-}
+  growth: number;
+};
 
-interface CompetitorTrackerProps {
-  competitors: Competitor[];
-}
+const competitors: Competitor[] = [
+  { name: "Your Company", value: 78, color: "bg-blue-500", growth: 12 },
+  { name: "Competitor A", value: 65, color: "bg-purple-500", growth: 8 },
+  { name: "Competitor B", value: 49, color: "bg-green-500", growth: -3 },
+  { name: "Competitor C", value: 42, color: "bg-yellow-500", growth: 5 },
+];
 
-export function CompetitorTracker({ competitors }: CompetitorTrackerProps) {
+export function CompetitorTracker() {
   return (
-    <Card className="dashboard-card">
+    <Card>
       <CardHeader>
-        <CardTitle className="text-md font-semibold">Competitor Analysis</CardTitle>
+        <CardTitle>Competitor Analysis</CardTitle>
+        <CardDescription>
+          Market share and growth relative to competitors
+        </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {competitors.map((competitor) => (
-            <div key={competitor.name} className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">{competitor.name}</span>
-                <span className="text-sm">{competitor.marketShare}%</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Progress 
-                  value={competitor.marketShare} 
-                  className="h-2" 
-                  indicatorClassName={`bg-[${competitor.color}]`}
-                />
-                <span
-                  className={`text-xs ${
-                    competitor.growth > 0
-                      ? "text-green-500"
-                      : competitor.growth < 0
-                      ? "text-red-500"
-                      : "text-gray-500"
-                  }`}
-                >
-                  {competitor.growth > 0 ? "+" : ""}
-                  {competitor.growth}%
+      <CardContent className="space-y-6">
+        {competitors.map((competitor) => (
+          <div key={competitor.name} className="space-y-1">
+            <div className="flex justify-between text-sm">
+              <span>{competitor.name}</span>
+              <div className="flex items-center gap-2">
+                <span>{competitor.value}%</span>
+                <span className={`text-xs ${competitor.growth > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {competitor.growth > 0 ? '+' : ''}{competitor.growth}%
                 </span>
               </div>
             </div>
-          ))}
-        </div>
+            <Progress 
+              value={competitor.value} 
+              className={competitor.name === "Your Company" ? "h-2 bg-muted" : "h-2 bg-muted/50"} 
+            />
+          </div>
+        ))}
       </CardContent>
     </Card>
   );

@@ -1,586 +1,702 @@
 
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
-import {
-  TrendingUp,
-  Users,
-  BarChart,
-  PieChart,
-  Globe,
-  Target,
-  Zap,
-  ArrowRight,
-  Lightbulb,
-  Rocket,
-  LineChart,
-  Eye
+import { 
+  BarChart3, 
+  TrendingUp, 
+  Target, 
+  Rocket, 
+  Globe, 
+  ShoppingBag, 
+  Users, 
+  Mail, 
+  Phone, 
+  MessageSquare,
+  Calendar,
+  Check,
+  Zap
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+
+// Sample market segments
+const marketSegments = [
+  { id: 1, name: "Small Business", size: 2500, growth: 12, budgetRange: "$1k-5k" },
+  { id: 2, name: "Mid-Market", size: 1200, growth: 8, budgetRange: "$5k-20k" },
+  { id: 3, name: "Enterprise", size: 450, growth: 5, budgetRange: "$20k-100k" },
+  { id: 4, name: "Healthcare", size: 800, growth: 14, budgetRange: "$10k-50k" },
+  { id: 5, name: "Financial Services", size: 600, growth: 7, budgetRange: "$15k-80k" },
+  { id: 6, name: "Technology", size: 1100, growth: 18, budgetRange: "$5k-40k" },
+];
+
+// Sample campaign channels
+const campaignChannels = [
+  { id: 1, name: "Email Marketing", effectiveness: 78, costPerLead: 12, conversionRate: 2.4 },
+  { id: 2, name: "Social Media", effectiveness: 85, costPerLead: 18, conversionRate: 1.8 },
+  { id: 3, name: "Content Marketing", effectiveness: 72, costPerLead: 22, conversionRate: 3.1 },
+  { id: 4, name: "PPC Advertising", effectiveness: 80, costPerLead: 35, conversionRate: 2.7 },
+  { id: 5, name: "Direct Mail", effectiveness: 62, costPerLead: 45, conversionRate: 1.2 },
+  { id: 6, name: "Trade Shows", effectiveness: 58, costPerLead: 120, conversionRate: 4.5 },
+];
+
+// Sample campaigns
+const sampleCampaigns = [
+  { 
+    id: 1, 
+    name: "Q2 Product Launch", 
+    status: "Active", 
+    budget: 25000, 
+    spent: 12500, 
+    leads: 420, 
+    conversions: 28,
+    roi: 18.5,
+    channels: ["Email Marketing", "Social Media", "PPC Advertising"],
+    segment: "Mid-Market",
+    startDate: "2023-04-01",
+    endDate: "2023-06-30"
+  },
+  { 
+    id: 2, 
+    name: "Healthcare Solution Webinar", 
+    status: "Planning", 
+    budget: 8000, 
+    spent: 0, 
+    leads: 0, 
+    conversions: 0,
+    roi: 0,
+    channels: ["Email Marketing", "Content Marketing"],
+    segment: "Healthcare",
+    startDate: "2023-07-15",
+    endDate: "2023-07-15"
+  },
+  { 
+    id: 3, 
+    name: "Enterprise Outreach", 
+    status: "Completed", 
+    budget: 50000, 
+    spent: 48750, 
+    leads: 850, 
+    conversions: 42,
+    roi: 24.2,
+    channels: ["Direct Mail", "Trade Shows", "Email Marketing"],
+    segment: "Enterprise",
+    startDate: "2023-01-15",
+    endDate: "2023-03-31"
+  }
+];
+
+type Campaign = {
+  id: number;
+  name: string;
+  status: string;
+  budget: number;
+  spent: number;
+  leads: number;
+  conversions: number;
+  roi: number;
+  channels: string[];
+  segment: string;
+  startDate: string;
+  endDate: string;
+};
 
 const GrowthEngine = () => {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("opportunities");
+  const [activeTab, setActiveTab] = useState("campaigns");
+  const [campaigns, setCampaigns] = useState<Campaign[]>(sampleCampaigns);
+  const [showNewCampaignDialog, setShowNewCampaignDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [campaignToDelete, setCampaignToDelete] = useState<number | null>(null);
+  const [selectedMarketSegments, setSelectedMarketSegments] = useState<string[]>([]);
+  const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
+  
+  const [newCampaign, setNewCampaign] = useState({
+    name: '',
+    segment: '',
+    budget: '',
+    startDate: '',
+    endDate: '',
+    channels: [] as string[],
+    description: ''
+  });
 
-  const marketOpportunities = [
-    {
-      id: 1,
-      name: "Healthcare AI Integration",
-      confidence: 92,
-      marketSize: "$32.5B",
-      growth: "+24%",
-      competition: "Medium",
-      timeToMarket: "6-9 months",
-      description: "Developing AI solutions for patient diagnosis, treatment planning, and medical research assistance."
-    },
-    {
-      id: 2,
-      name: "Financial Services Automation",
-      confidence: 87,
-      marketSize: "$45.8B",
-      growth: "+18%",
-      competition: "High",
-      timeToMarket: "3-6 months",
-      description: "AI-powered tools for fraud detection, risk assessment, and automated trading strategies."
-    },
-    {
-      id: 3,
-      name: "Manufacturing Process Optimization",
-      confidence: 84,
-      marketSize: "$28.3B",
-      growth: "+15%",
-      competition: "Low",
-      timeToMarket: "9-12 months",
-      description: "Predictive maintenance, quality control, and supply chain optimization for manufacturing."
-    },
-    {
-      id: 4,
-      name: "Retail Personalization Engine",
-      confidence: 79,
-      marketSize: "$19.7B",
-      growth: "+22%",
-      competition: "Medium",
-      timeToMarket: "4-7 months",
-      description: "AI-driven recommendation systems and customer behavior analysis for retail environments."
-    }
-  ];
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setNewCampaign(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
-  const strategicPartners = [
-    {
-      id: 1,
-      name: "CloudTech Solutions",
-      type: "Infrastructure",
-      alignment: 92,
-      benefits: ["Preferred pricing", "Joint marketing", "Technical support"],
-      status: "Active"
-    },
-    {
-      id: 2,
-      name: "DataCore Systems",
-      type: "Data Provider",
-      alignment: 87,
-      benefits: ["Access to proprietary datasets", "Reduced API costs", "Co-development"],
-      status: "Active"
-    },
-    {
-      id: 3,
-      name: "SaaS Connect",
-      type: "Integration Platform",
-      alignment: 76,
-      benefits: ["Access to customer base", "Integration marketplace", "Technical certification"],
-      status: "Pending"
-    }
-  ];
+  const handleSelectChange = (name: string, value: string) => {
+    setNewCampaign(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
-  const customerSegments = [
-    {
-      id: 1,
-      name: "Enterprise Healthcare",
-      acquisitionCost: "$8,500",
-      lifetimeValue: "$125,000",
-      conversionRate: "4.2%",
-      growthRate: "+18%",
-      satisfaction: 92
-    },
-    {
-      id: 2,
-      name: "Mid-Market Finance",
-      acquisitionCost: "$5,200",
-      lifetimeValue: "$78,000",
-      conversionRate: "5.8%",
-      growthRate: "+24%",
-      satisfaction: 87
-    },
-    {
-      id: 3,
-      name: "SMB Technology",
-      acquisitionCost: "$2,800",
-      lifetimeValue: "$42,000",
-      conversionRate: "7.3%",
-      growthRate: "+32%",
-      satisfaction: 85
-    }
-  ];
-
-  const marketExpansionStrategies = [
-    {
-      id: 1,
-      name: "Geographic Expansion - APAC",
-      impact: 85,
-      timeframe: "12-18 months",
-      investmentLevel: "High",
-      riskLevel: "Medium",
-      description: "Establish regional headquarters and partnerships in key APAC markets."
-    },
-    {
-      id: 2,
-      name: "Vertical Integration - Healthcare",
-      impact: 78,
-      timeframe: "6-12 months",
-      investmentLevel: "Medium",
-      riskLevel: "Low",
-      description: "Develop specialized offerings for healthcare providers and research institutions."
-    },
-    {
-      id: 3,
-      name: "Product Expansion - Edge AI",
-      impact: 92,
-      timeframe: "9-15 months",
-      investmentLevel: "High",
-      riskLevel: "Medium",
-      description: "Create low-latency edge AI solutions for IoT and manufacturing environments."
-    }
-  ];
-
-  const handleExploreOpportunity = (id: number) => {
-    toast({
-      title: "Opportunity Analysis Initiated",
-      description: "A detailed analysis of this market opportunity has been started.",
+  const handleMultiSelectChange = (name: string, value: string) => {
+    setNewCampaign(prev => {
+      const updatedValues = prev[name as keyof typeof prev] as string[];
+      
+      if (Array.isArray(updatedValues)) {
+        if (updatedValues.includes(value)) {
+          return {
+            ...prev,
+            [name]: updatedValues.filter(item => item !== value)
+          };
+        } else {
+          return {
+            ...prev,
+            [name]: [...updatedValues, value]
+          };
+        }
+      }
+      
+      return prev;
     });
   };
 
-  const handleInitiatePartnership = (id: number) => {
-    toast({
-      title: "Partnership Process Started",
-      description: "The partnership evaluation and outreach process has been initiated.",
+  const handleMarketSegmentSelect = (segmentName: string) => {
+    if (selectedMarketSegments.includes(segmentName)) {
+      setSelectedMarketSegments(selectedMarketSegments.filter(name => name !== segmentName));
+    } else {
+      setSelectedMarketSegments([...selectedMarketSegments, segmentName]);
+    }
+  };
+
+  const handleChannelSelect = (channelName: string) => {
+    if (selectedChannels.includes(channelName)) {
+      setSelectedChannels(selectedChannels.filter(name => name !== channelName));
+    } else {
+      setSelectedChannels([...selectedChannels, channelName]);
+    }
+  };
+
+  const createCampaign = () => {
+    // Validate inputs
+    if (!newCampaign.name || !newCampaign.segment || !newCampaign.budget || !newCampaign.startDate || newCampaign.channels.length === 0) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Create new campaign
+    const campaign: Campaign = {
+      id: campaigns.length + 1,
+      name: newCampaign.name,
+      status: "Planning",
+      budget: parseFloat(newCampaign.budget),
+      spent: 0,
+      leads: 0,
+      conversions: 0,
+      roi: 0,
+      channels: newCampaign.channels,
+      segment: newCampaign.segment,
+      startDate: newCampaign.startDate,
+      endDate: newCampaign.endDate || newCampaign.startDate
+    };
+
+    // Add to campaigns list
+    setCampaigns([...campaigns, campaign]);
+
+    // Reset form and close dialog
+    setNewCampaign({
+      name: '',
+      segment: '',
+      budget: '',
+      startDate: '',
+      endDate: '',
+      channels: [],
+      description: ''
     });
+    setShowNewCampaignDialog(false);
+
+    // Show success notification
+    toast({
+      title: "Campaign Created",
+      description: `${campaign.name} has been added to your campaigns`,
+    });
+  };
+
+  const launchCampaign = (id: number) => {
+    setCampaigns(campaigns.map(campaign => {
+      if (campaign.id === id && campaign.status === "Planning") {
+        return { ...campaign, status: "Active" };
+      }
+      return campaign;
+    }));
+
+    toast({
+      title: "Campaign Launched",
+      description: "Campaign is now active and running"
+    });
+  };
+
+  const confirmDeleteCampaign = (id: number) => {
+    setCampaignToDelete(id);
+    setShowDeleteDialog(true);
+  };
+
+  const deleteCampaign = () => {
+    if (campaignToDelete) {
+      setCampaigns(campaigns.filter(campaign => campaign.id !== campaignToDelete));
+      setCampaignToDelete(null);
+      setShowDeleteDialog(false);
+      
+      toast({
+        title: "Campaign Deleted",
+        description: "The campaign has been removed"
+      });
+    }
+  };
+
+  const getCampaignStatusColor = (status: string) => {
+    switch (status) {
+      case "Active": return "bg-green-500";
+      case "Planning": return "bg-blue-500";
+      case "Completed": return "bg-gray-500";
+      case "Paused": return "bg-yellow-500";
+      default: return "bg-gray-300";
+    }
   };
 
   return (
     <div className="container mx-auto space-y-6">
       <div className="flex flex-col md:flex-row items-center justify-between mb-6">
         <h1 className="text-3xl font-bold mb-4 md:mb-0">
-          <span className="bg-gradient-to-r from-evolve-blue-500 via-evolve-purple-500 to-evolve-teal-500 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-evolve-blue-500 via-evolve-purple-500 to-evolve-teal-500 bg-clip-text text-transparent flex items-center">
+            <Rocket className="h-8 w-8 mr-2" />
             Growth Engine
           </span>
         </h1>
-        
-        <div className="flex space-x-2">
-          <Button variant="outline" className="gap-2">
-            <Eye className="h-4 w-4" />
-            Executive Summary
-          </Button>
-          <Button className="gap-2">
-            <Rocket className="h-4 w-4" />
-            Launch Campaign
+        <div className="flex gap-2">
+          <Button onClick={() => setShowNewCampaignDialog(true)}>
+            <Zap className="mr-2 h-4 w-4" />
+            Launch New Campaign
           </Button>
         </div>
       </div>
 
-      <Tabs defaultValue="opportunities" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid grid-cols-1 md:grid-cols-4">
-          <TabsTrigger value="opportunities" className="gap-2">
-            <TrendingUp className="h-4 w-4" />
-            Market Opportunities
+      <Tabs defaultValue="campaigns" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-3 mb-4">
+          <TabsTrigger value="campaigns" className="flex items-center gap-2">
+            <Rocket className="h-4 w-4" />
+            <span>Campaigns</span>
           </TabsTrigger>
-          <TabsTrigger value="partners" className="gap-2">
-            <Users className="h-4 w-4" />
-            Strategic Partners
+          <TabsTrigger value="market" className="flex items-center gap-2">
+            <Target className="h-4 w-4" />
+            <span>Market Segments</span>
           </TabsTrigger>
-          <TabsTrigger value="customers" className="gap-2">
-            <PieChart className="h-4 w-4" />
-            Customer Segments
-          </TabsTrigger>
-          <TabsTrigger value="expansion" className="gap-2">
-            <Globe className="h-4 w-4" />
-            Market Expansion
+          <TabsTrigger value="channels" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            <span>Marketing Channels</span>
           </TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="opportunities" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
-                High-Confidence Market Opportunities
-              </CardTitle>
-              <CardDescription>
-                AI-identified market opportunities with the highest confidence scores
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {marketOpportunities.map((opportunity) => (
-                  <div key={opportunity.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div className="flex flex-col lg:flex-row justify-between gap-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between lg:justify-start gap-4">
-                          <h3 className="font-medium text-lg">{opportunity.name}</h3>
-                          <div className="px-2 py-1 bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 rounded text-sm font-medium">
-                            {opportunity.confidence}% Confidence
-                          </div>
-                        </div>
-                        
-                        <p className="text-sm text-muted-foreground">{opportunity.description}</p>
-                        
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
-                          <div>
-                            <p className="text-xs text-muted-foreground">Market Size</p>
-                            <p className="font-semibold">{opportunity.marketSize}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Annual Growth</p>
-                            <p className="font-semibold text-green-600 dark:text-green-400">{opportunity.growth}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Competition</p>
-                            <p className="font-semibold">{opportunity.competition}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Time to Market</p>
-                            <p className="font-semibold">{opportunity.timeToMarket}</p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center">
-                        <Button 
-                          variant="outline" 
-                          className="whitespace-nowrap"
-                          onClick={() => handleExploreOpportunity(opportunity.id)}
-                        >
-                          Explore Opportunity
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="partners" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Strategic Partnership Opportunities
-              </CardTitle>
-              <CardDescription>
-                Potential and existing partners with highest strategic alignment
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {strategicPartners.map((partner) => (
-                  <div key={partner.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div className="flex flex-col lg:flex-row justify-between gap-4">
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between lg:justify-start gap-4">
-                          <h3 className="font-medium text-lg">{partner.name}</h3>
-                          <div className={`px-2 py-1 rounded text-sm font-medium ${
-                            partner.status === 'Active' 
-                              ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300' 
-                              : 'bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300'
-                          }`}>
-                            {partner.status}
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">Type:</span>
-                          <span className="text-sm font-medium">{partner.type}</span>
-                        </div>
-                        
-                        <div className="space-y-1">
-                          <div className="flex justify-between">
-                            <span className="text-sm">Strategic Alignment</span>
-                            <span className="text-sm font-medium">{partner.alignment}%</span>
-                          </div>
-                          <Progress value={partner.alignment} className="h-2" />
-                        </div>
-                        
-                        <div>
-                          <p className="text-sm font-medium mb-1">Key Benefits</p>
-                          <ul className="grid grid-cols-1 md:grid-cols-2 gap-1">
-                            {partner.benefits.map((benefit, index) => (
-                              <li key={index} className="text-sm flex items-center gap-1">
-                                <Zap className="h-3 w-3 text-yellow-500" />
-                                {benefit}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center">
-                        <Button 
-                          variant={partner.status === 'Active' ? 'outline' : 'default'}
-                          className="whitespace-nowrap"
-                          onClick={() => handleInitiatePartnership(partner.id)}
-                        >
-                          {partner.status === 'Active' ? 'Manage Partnership' : 'Initiate Partnership'}
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="customers" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <TabsContent value="campaigns" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart className="h-5 w-5" />
-                  Customer Segment Analysis
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <Rocket className="h-5 w-5 mr-2 text-blue-500" />
+                  Active Campaigns
                 </CardTitle>
-                <CardDescription>
-                  Key metrics across major customer segments
-                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
-                  {customerSegments.map((segment) => (
-                    <div key={segment.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                      <h3 className="font-medium mb-3">{segment.name}</h3>
-                      
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <p className="text-xs text-muted-foreground">Customer Acquisition Cost</p>
-                          <p className="font-semibold">{segment.acquisitionCost}</p>
+                <div className="text-3xl font-bold">
+                  {campaigns.filter(c => c.status === "Active").length}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {campaigns.filter(c => c.status === "Planning").length} in planning
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <ShoppingBag className="h-5 w-5 mr-2 text-green-500" />
+                  Total Conversions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">
+                  {campaigns.reduce((sum, campaign) => sum + campaign.conversions, 0)}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  From {campaigns.reduce((sum, campaign) => sum + campaign.leads, 0)} leads
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <TrendingUp className="h-5 w-5 mr-2 text-purple-500" />
+                  Average ROI
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">
+                  {campaigns.length > 0 
+                    ? `${(campaigns.reduce((sum, campaign) => sum + campaign.roi, 0) / campaigns.length).toFixed(1)}%` 
+                    : '0%'}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Across all campaigns
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Campaign Management</CardTitle>
+              <CardDescription>Track, analyze, and optimize your marketing campaigns</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left font-medium px-4 py-3">Campaign</th>
+                      <th className="text-left font-medium px-4 py-3">Status</th>
+                      <th className="text-left font-medium px-4 py-3">Segment</th>
+                      <th className="text-left font-medium px-4 py-3">Budget</th>
+                      <th className="text-left font-medium px-4 py-3">Spent</th>
+                      <th className="text-left font-medium px-4 py-3">Leads</th>
+                      <th className="text-left font-medium px-4 py-3">ROI</th>
+                      <th className="text-left font-medium px-4 py-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {campaigns.map((campaign) => (
+                      <tr key={campaign.id} className="border-b hover:bg-muted/50">
+                        <td className="px-4 py-3">
+                          <div className="font-medium">{campaign.name}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(campaign.startDate).toLocaleDateString()} - {new Date(campaign.endDate).toLocaleDateString()}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${getCampaignStatusColor(campaign.status)}`}></div>
+                            {campaign.status}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">{campaign.segment}</td>
+                        <td className="px-4 py-3">${campaign.budget.toLocaleString()}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex flex-col space-y-1">
+                            <div className="flex justify-between">
+                              <span>${campaign.spent.toLocaleString()}</span>
+                              <span className="text-muted-foreground">{Math.round((campaign.spent / campaign.budget) * 100)}%</span>
+                            </div>
+                            <Progress value={(campaign.spent / campaign.budget) * 100} className="h-1" />
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">{campaign.leads}</td>
+                        <td className="px-4 py-3">{campaign.roi}%</td>
+                        <td className="px-4 py-3">
+                          <div className="flex gap-2">
+                            {campaign.status === "Planning" && (
+                              <Button size="sm" variant="outline" onClick={() => launchCampaign(campaign.id)}>
+                                <Rocket className="h-3 w-3 mr-1" /> Launch
+                              </Button>
+                            )}
+                            <Button size="sm" variant="outline" onClick={() => confirmDeleteCampaign(campaign.id)}>
+                              Delete
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="market" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Market Segment Analysis</CardTitle>
+              <CardDescription>Identify and target the most profitable customer segments</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {marketSegments.map((segment) => (
+                  <div 
+                    key={segment.id} 
+                    className={`border rounded-lg p-4 transition-all cursor-pointer ${
+                      selectedMarketSegments.includes(segment.name) 
+                        ? 'ring-2 ring-primary/70 shadow-md' 
+                        : 'hover:shadow-md'
+                    }`}
+                    onClick={() => handleMarketSegmentSelect(segment.name)}
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="font-medium text-lg">{segment.name}</h3>
+                      {selectedMarketSegments.includes(segment.name) && (
+                        <div className="h-5 w-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center">
+                          <Check className="h-3 w-3" />
                         </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Customer Lifetime Value</p>
-                          <p className="font-semibold">{segment.lifetimeValue}</p>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Market Size</span>
+                          <span className="font-medium">{segment.size.toLocaleString()} companies</span>
                         </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Conversion Rate</p>
-                          <p className="font-semibold">{segment.conversionRate}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">YoY Growth</p>
-                          <p className="font-semibold text-green-600 dark:text-green-400">{segment.growthRate}</p>
-                        </div>
+                        <Progress value={segment.size / 30} className="h-1" />
                       </div>
                       
-                      <div className="space-y-1">
-                        <div className="flex justify-between">
-                          <span className="text-sm">Satisfaction Score</span>
-                          <span className="text-sm font-medium">{segment.satisfaction}/100</span>
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Growth Rate</span>
+                          <span className={`font-medium ${segment.growth > 10 ? 'text-green-600' : ''}`}>
+                            {segment.growth}% annually
+                          </span>
                         </div>
-                        <Progress value={segment.satisfaction} className="h-2" />
+                        <Progress value={segment.growth * 5} className="h-1" />
                       </div>
+                      
+                      <div>
+                        <div className="text-sm mb-1">Budget Range</div>
+                        <div className="font-medium">{segment.budgetRange}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="channels" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Marketing Channel Performance</CardTitle>
+              <CardDescription>Evaluate and optimize your marketing channel mix</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {campaignChannels.map((channel) => (
+                  <div 
+                    key={channel.id} 
+                    className={`border rounded-lg p-4 transition-all cursor-pointer ${
+                      selectedChannels.includes(channel.name) 
+                        ? 'ring-2 ring-primary/70 shadow-md' 
+                        : 'hover:shadow-md'
+                    }`}
+                    onClick={() => handleChannelSelect(channel.name)}
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="font-medium text-lg">{channel.name}</h3>
+                      {selectedChannels.includes(channel.name) && (
+                        <div className="h-5 w-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center">
+                          <Check className="h-3 w-3" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Effectiveness</span>
+                          <span className="font-medium">{channel.effectiveness}%</span>
+                        </div>
+                        <Progress value={channel.effectiveness} className="h-1" />
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Cost Per Lead</span>
+                          <span className={`font-medium ${channel.costPerLead < 20 ? 'text-green-600' : ''}`}>
+                            ${channel.costPerLead}
+                          </span>
+                        </div>
+                        <Progress value={100 - (channel.costPerLead * 2)} max={100} className="h-1" />
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Conversion Rate</span>
+                          <span className={`font-medium ${channel.conversionRate > 2.5 ? 'text-green-600' : ''}`}>
+                            {channel.conversionRate}%
+                          </span>
+                        </div>
+                        <Progress value={channel.conversionRate * 20} className="h-1" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* New Campaign Dialog */}
+      <Dialog open={showNewCampaignDialog} onOpenChange={setShowNewCampaignDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Create New Marketing Campaign</DialogTitle>
+            <DialogDescription>
+              Set up your campaign details and marketing strategy.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Campaign Name</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  placeholder="Enter campaign name"
+                  value={newCampaign.name}
+                  onChange={handleInputChange}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="segment">Target Segment</Label>
+                  <Select 
+                    value={newCampaign.segment} 
+                    onValueChange={(value) => handleSelectChange('segment', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select market segment" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {marketSegments.map(segment => (
+                        <SelectItem key={segment.id} value={segment.name}>
+                          {segment.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="budget">Budget ($)</Label>
+                  <Input
+                    id="budget"
+                    name="budget"
+                    type="number"
+                    placeholder="Enter budget amount"
+                    value={newCampaign.budget}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="startDate">Start Date</Label>
+                  <Input
+                    id="startDate"
+                    name="startDate"
+                    type="date"
+                    value={newCampaign.startDate}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="endDate">End Date</Label>
+                  <Input
+                    id="endDate"
+                    name="endDate"
+                    type="date"
+                    value={newCampaign.endDate}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Marketing Channels</Label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {campaignChannels.map(channel => (
+                    <div
+                      key={channel.id}
+                      className={`px-3 py-2 rounded-md border text-sm cursor-pointer flex items-center ${
+                        newCampaign.channels.includes(channel.name)
+                          ? 'bg-primary/10 border-primary/30'
+                          : 'hover:bg-muted'
+                      }`}
+                      onClick={() => handleMultiSelectChange('channels', channel.name)}
+                    >
+                      {newCampaign.channels.includes(channel.name) && (
+                        <Check className="h-3 w-3 mr-2 text-primary" />
+                      )}
+                      <span>{channel.name}</span>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <LineChart className="h-5 w-5" />
-                  Growth Forecasts by Segment
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="h-[400px] flex items-center justify-center">
-                <div className="text-center">
-                  <LineChart className="h-16 w-16 mx-auto text-muted-foreground/50" />
-                  <p className="mt-4 text-muted-foreground">Interactive growth forecast visualization would be displayed here</p>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="description">Campaign Description</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  placeholder="Enter campaign details..."
+                  rows={3}
+                  value={newCampaign.description}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
           </div>
           
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Lightbulb className="h-5 w-5" />
-                AI-Generated Growth Recommendations
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Users className="h-5 w-5 text-blue-500" />
-                    <h3 className="font-medium">Enterprise Healthcare</h3>
-                  </div>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start gap-2">
-                      <ArrowRight className="h-4 w-4 mt-0.5 text-green-500" />
-                      <span>Develop specialized compliance features for regulatory environments</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <ArrowRight className="h-4 w-4 mt-0.5 text-green-500" />
-                      <span>Partner with EHR providers for deeper integrations</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <ArrowRight className="h-4 w-4 mt-0.5 text-green-500" />
-                      <span>Host industry-specific thought leadership events</span>
-                    </li>
-                  </ul>
-                </div>
-                
-                <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Users className="h-5 w-5 text-purple-500" />
-                    <h3 className="font-medium">Mid-Market Finance</h3>
-                  </div>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start gap-2">
-                      <ArrowRight className="h-4 w-4 mt-0.5 text-green-500" />
-                      <span>Create simplified onboarding for quicker time-to-value</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <ArrowRight className="h-4 w-4 mt-0.5 text-green-500" />
-                      <span>Develop pre-built financial risk assessment templates</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <ArrowRight className="h-4 w-4 mt-0.5 text-green-500" />
-                      <span>Implement tiered pricing model with growth incentives</span>
-                    </li>
-                  </ul>
-                </div>
-                
-                <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Users className="h-5 w-5 text-teal-500" />
-                    <h3 className="font-medium">SMB Technology</h3>
-                  </div>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start gap-2">
-                      <ArrowRight className="h-4 w-4 mt-0.5 text-green-500" />
-                      <span>Launch self-service plan with API-limited features</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <ArrowRight className="h-4 w-4 mt-0.5 text-green-500" />
-                      <span>Create integration marketplace for popular SMB tools</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <ArrowRight className="h-4 w-4 mt-0.5 text-green-500" />
-                      <span>Develop referral program with compelling incentives</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="expansion" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5" />
-                Market Expansion Strategies
-              </CardTitle>
-              <CardDescription>
-                AI-generated recommendations for market expansion
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {marketExpansionStrategies.map((strategy) => (
-                  <div key={strategy.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div className="flex flex-col lg:flex-row justify-between gap-4">
-                      <div className="space-y-3">
-                        <h3 className="font-medium text-lg">{strategy.name}</h3>
-                        <p className="text-sm text-muted-foreground">{strategy.description}</p>
-                        
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                          <div>
-                            <p className="text-xs text-muted-foreground">Timeframe</p>
-                            <p className="font-medium">{strategy.timeframe}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Investment</p>
-                            <p className="font-medium">{strategy.investmentLevel}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Risk Level</p>
-                            <p className="font-medium">{strategy.riskLevel}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-1">
-                          <div className="flex justify-between">
-                            <span className="text-sm">Potential Impact</span>
-                            <span className="text-sm font-medium">{strategy.impact}%</span>
-                          </div>
-                          <Progress value={strategy.impact} className="h-2" />
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center">
-                        <Button 
-                          variant="outline" 
-                          className="whitespace-nowrap"
-                        >
-                          View Strategy Details
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Geographic Targeting
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="h-64 flex items-center justify-center">
-                <div className="text-center">
-                  <Globe className="h-16 w-16 mx-auto text-muted-foreground/50" />
-                  <p className="mt-4 text-muted-foreground">Interactive geographic map would be displayed here</p>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart className="h-5 w-5" />
-                  Market Penetration Analysis
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="h-64 flex items-center justify-center">
-                <div className="text-center">
-                  <BarChart className="h-16 w-16 mx-auto text-muted-foreground/50" />
-                  <p className="mt-4 text-muted-foreground">Interactive market penetration chart would be displayed here</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewCampaignDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={createCampaign}>
+              Create Campaign
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this campaign and all associated data.
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteCampaign} className="bg-destructive text-destructive-foreground">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
