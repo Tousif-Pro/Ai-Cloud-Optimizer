@@ -6,14 +6,46 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { Slider } from "@/components/ui/slider";
+import { 
+  ChartBarIcon, 
+  CloudIcon, 
+  CogIcon, 
+  LineChart, 
+  PercentIcon, 
+  PieChart, 
+  Users 
+} from "lucide-react";
 
 export default function Settings() {
   const { toast } = useToast();
+  const [aiAggressiveness, setAiAggressiveness] = useState(50);
+  const [goalSettings, setGoalSettings] = useState({
+    revenue: 200000,
+    customerAcquisition: 50,
+    retention: 95,
+    marketShare: 15
+  });
 
   const handleSave = () => {
     toast({
       title: "Settings updated",
       description: "Your changes have been saved successfully.",
+    });
+  };
+
+  const updateGoal = (key: keyof typeof goalSettings, value: number) => {
+    setGoalSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  const runGrowthSimulation = () => {
+    toast({
+      title: "Growth Simulation Complete",
+      description: "AI has projected a 27% growth potential based on your current settings and market conditions.",
     });
   };
 
@@ -24,7 +56,7 @@ export default function Settings() {
           Settings
         </h1>
         <p className="text-muted-foreground">
-          Manage your account and platform preferences
+          Manage your account, platform preferences, and business growth targets
         </p>
       </div>
 
@@ -33,6 +65,7 @@ export default function Settings() {
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="api">API & Integrations</TabsTrigger>
+          <TabsTrigger value="growth">Growth Engine</TabsTrigger>
         </TabsList>
         
         <TabsContent value="general">
@@ -190,6 +223,194 @@ export default function Settings() {
             </CardContent>
             <CardFooter>
               <Button onClick={handleSave}>Save Integration Settings</Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="growth">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <LineChart className="h-5 w-5" />
+                AI Growth Engine
+              </CardTitle>
+              <CardDescription>
+                Configure your business growth parameters and AI-driven optimization strategies
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="ai-aggressiveness">AI Strategy Aggressiveness</Label>
+                  <span className="text-sm font-medium">{aiAggressiveness}%</span>
+                </div>
+                <Slider 
+                  id="ai-aggressiveness"
+                  min={10} 
+                  max={100} 
+                  step={5}
+                  value={[aiAggressiveness]}
+                  onValueChange={(value) => setAiAggressiveness(value[0])}
+                />
+                <p className="text-sm text-muted-foreground">
+                  Higher values prioritize aggressive growth strategies, while lower values favor stability and risk minimization.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <ChartBarIcon className="h-4 w-4" />
+                      Revenue Goals
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <Label htmlFor="revenue-goal">Quarterly Revenue Target ($)</Label>
+                      <Input 
+                        id="revenue-goal" 
+                        type="number" 
+                        value={goalSettings.revenue}
+                        onChange={(e) => updateGoal('revenue', Number(e.target.value))}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      Customer Acquisition
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <Label htmlFor="customer-goal">New Customers (Per Quarter)</Label>
+                      <Input 
+                        id="customer-goal" 
+                        type="number" 
+                        value={goalSettings.customerAcquisition}
+                        onChange={(e) => updateGoal('customerAcquisition', Number(e.target.value))}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <PercentIcon className="h-4 w-4" />
+                      Retention Rate
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <Label htmlFor="retention-goal">Customer Retention Target (%)</Label>
+                      <Input 
+                        id="retention-goal" 
+                        type="number" 
+                        value={goalSettings.retention}
+                        onChange={(e) => updateGoal('retention', Number(e.target.value))}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <PieChart className="h-4 w-4" />
+                      Market Share
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <Label htmlFor="market-goal">Target Market Share (%)</Label>
+                      <Input 
+                        id="market-goal" 
+                        type="number" 
+                        value={goalSettings.marketShare}
+                        onChange={(e) => updateGoal('marketShare', Number(e.target.value))}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card className="border-2 border-accent/20">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">AI Growth Simulation</CardTitle>
+                  <CardDescription>
+                    Use AI to simulate growth trajectories based on your settings and market conditions
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <div className="space-y-2 flex-1">
+                      <Label htmlFor="simulation-period">Simulation Period (Months)</Label>
+                      <Input id="simulation-period" type="number" defaultValue={12} />
+                    </div>
+                    <div className="space-y-2 flex-1">
+                      <Label htmlFor="market-conditions">Market Conditions</Label>
+                      <select id="market-conditions" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                        <option>Favorable</option>
+                        <option>Neutral</option>
+                        <option>Challenging</option>
+                        <option>Volatile</option>
+                      </select>
+                    </div>
+                  </div>
+                  <Button onClick={runGrowthSimulation} className="w-full mt-4">
+                    Run AI Growth Simulation
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <div className="pt-4">
+                <h3 className="text-lg font-medium mb-3">AI Growth Strategy Recommendations</h3>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3 p-3 bg-muted rounded-lg">
+                    <div className="mt-0.5">
+                      <Users className="h-5 w-5 text-blue-500" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium">Customer Acquisition Focus</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Allocate 40% more resources to LinkedIn outreach campaigns targeting CTOs and Heads of AI in healthcare and finance sectors.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-muted rounded-lg">
+                    <div className="mt-0.5">
+                      <CloudIcon className="h-5 w-5 text-teal-500" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium">Product Enhancement Priority</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Develop real-time monitoring dashboard for edge AI deployments to address the rising demand from manufacturing clients.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-muted rounded-lg">
+                    <div className="mt-0.5">
+                      <CogIcon className="h-5 w-5 text-purple-500" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium">Operational Efficiency</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Implement automated client onboarding workflow to reduce time-to-value by an estimated 37%, improving customer satisfaction metrics.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button onClick={handleSave}>Save Growth Settings</Button>
             </CardFooter>
           </Card>
         </TabsContent>

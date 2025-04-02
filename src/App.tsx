@@ -12,6 +12,8 @@ import TrendPredictions from "@/pages/TrendPredictions";
 import DataInsights from "@/pages/DataInsights";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
+import CloudCostOptimizer from "@/pages/CloudCostOptimizer";
+import EmployeeProductivity from "@/pages/EmployeeProductivity";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +29,8 @@ const App = () => (
             <Route path="/trends" element={<TrendPredictions />} />
             <Route path="/insights" element={<DataInsights />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/cloud-optimizer" element={<CloudCostOptimizer />} />
+            <Route path="/employee-productivity" element={<EmployeeProductivity />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AppLayout>

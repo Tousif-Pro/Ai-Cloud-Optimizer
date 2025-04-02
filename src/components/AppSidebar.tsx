@@ -11,7 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { ChartBar, Database, Search, Users, Lightbulb, Cog } from "lucide-react";
+import { ChartBar, Database, Search, Users, Lightbulb, Cog, Cloud, Target } from "lucide-react";
 import { Link } from "react-router-dom";
 
 // Menu items for the sidebar
@@ -30,6 +30,16 @@ const menuItems = [
     title: "Resource Allocation",
     path: "/resources",
     icon: Users,
+  },
+  {
+    title: "Cloud Cost Optimizer",
+    path: "/cloud-optimizer",
+    icon: Cloud, 
+  },
+  {
+    title: "Employee Development",
+    path: "/employee-productivity",
+    icon: Target,
   },
   {
     title: "Trend Predictions",
@@ -86,7 +96,7 @@ export function AppSidebar() {
       <SidebarFooter className="px-4 py-4">
         <div className="flex flex-col space-y-2">
           <div className="text-xs text-sidebar-foreground/70">
-            Powered by AI • Version 1.0
+            Powered by AI • Version 1.1
           </div>
         </div>
       </SidebarFooter>
