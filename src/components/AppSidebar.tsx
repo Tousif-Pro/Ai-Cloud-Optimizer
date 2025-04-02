@@ -11,8 +11,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { ChartBar, Database, Search, Users, Lightbulb, Cog, Cloud, Target } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ChartBar, Database, Search, Users, Lightbulb, Cog, Cloud, Target, Rocket, Zap } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 // Menu items for the sidebar
 const menuItems = [
@@ -42,6 +42,12 @@ const menuItems = [
     icon: Target,
   },
   {
+    title: "Growth Engine",
+    path: "/growth-engine",
+    icon: Rocket,
+    highlight: true
+  },
+  {
     title: "Trend Predictions",
     path: "/trends",
     icon: Lightbulb,
@@ -59,6 +65,8 @@ const menuItems = [
 ];
 
 export function AppSidebar() {
+  const location = useLocation();
+  
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
@@ -80,10 +88,15 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton 
+                    asChild
+                    isActive={location.pathname === item.path}
+                    className={item.highlight ? "relative overflow-visible after:absolute after:-right-1 after:-top-1 after:h-2 after:w-2 after:rounded-full after:bg-green-500" : ""}
+                  >
                     <Link to={item.path} className="flex items-center gap-3">
                       <item.icon className="h-5 w-5" />
                       <span>{item.title}</span>
+                      {item.highlight && <Zap className="h-3 w-3 text-green-500 absolute right-2" />}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -96,7 +109,7 @@ export function AppSidebar() {
       <SidebarFooter className="px-4 py-4">
         <div className="flex flex-col space-y-2">
           <div className="text-xs text-sidebar-foreground/70">
-            Powered by AI • Version 1.1
+            Powered by AI • Version 1.2
           </div>
         </div>
       </SidebarFooter>

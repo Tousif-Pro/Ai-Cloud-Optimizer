@@ -14,6 +14,7 @@ import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
 import CloudCostOptimizer from "@/pages/CloudCostOptimizer";
 import EmployeeProductivity from "@/pages/EmployeeProductivity";
+import GrowthEngine from "@/pages/GrowthEngine";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/cloud-optimizer" element={<CloudCostOptimizer />} />
             <Route path="/employee-productivity" element={<EmployeeProductivity />} />
+            <Route path="/growth-engine" element={<GrowthEngine />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AppLayout>
