@@ -4,6 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Users } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Sample resource data
 const teamMembers = [
@@ -101,6 +102,13 @@ function getPriorityBadge(priority: string) {
   }
 }
 
+// Helper function to get appropriate color for progress bar
+function getProgressColor(value: number) {
+  if (value > 90) return "bg-red-500";
+  if (value > 75) return "bg-amber-500";
+  return "bg-green-500";
+}
+
 export default function ResourceAllocation() {
   return (
     <div className="space-y-6">
@@ -147,11 +155,12 @@ export default function ResourceAllocation() {
                       </span>
                     </div>
                     
-                    <Progress 
-                      value={member.allocation} 
-                      className="h-2" 
-                      indicatorClassName={member.allocation > 90 ? "bg-red-500" : member.allocation > 75 ? "bg-amber-500" : "bg-green-500"}
-                    />
+                    <div className={cn("h-2 w-full rounded-full overflow-hidden bg-secondary")}>
+                      <div 
+                        className={cn("h-full", getProgressColor(member.allocation))} 
+                        style={{ width: `${member.allocation}%` }} 
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -183,11 +192,12 @@ export default function ResourceAllocation() {
                       <span>Usage: {resource.usage}%</span>
                     </div>
                     
-                    <Progress 
-                      value={resource.usage} 
-                      className="h-2" 
-                      indicatorClassName={resource.usage > 80 ? "bg-red-500" : resource.usage > 60 ? "bg-amber-500" : "bg-green-500"}
-                    />
+                    <div className={cn("h-2 w-full rounded-full overflow-hidden bg-secondary")}>
+                      <div 
+                        className={cn("h-full", getProgressColor(resource.usage))} 
+                        style={{ width: `${resource.usage}%` }} 
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
