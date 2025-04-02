@@ -1,677 +1,791 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Server, 
-  Database, 
-  Cpu, 
-  HardDrive, 
-  BarChart, 
-  CloudOff, 
-  DollarSign,
-  ArrowRight, 
-  ArrowLeft,
-  CloudCog
-} from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { CheckCircle2, Server, Database, HardDrive, Cloud, DollarSign, Zap, BarChart4, Award, RefreshCw } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
-// AWS and Azure service pricing models (simplified for demo)
-const cloudProviders = {
-  aws: {
+interface CloudProvider {
+  id: string;
+  name: string;
+  logo: JSX.Element;
+  description: string;
+  serviceTypes: CloudServiceType[];
+}
+
+interface CloudServiceType {
+  id: string;
+  name: string;
+  description: string;
+  services: CloudService[];
+}
+
+interface CloudService {
+  id: string;
+  name: string;
+  description: string;
+  pricing: {
+    compute: {
+      monthly: number;
+      hourly: number;
+    };
+    storage: {
+      pricePerGB: number;
+    };
+    database: {
+      monthly: number;
+    };
+  };
+  features: string[];
+}
+
+// Define pricing data
+const cloudProviders: CloudProvider[] = [
+  {
+    id: "aws",
     name: "Amazon Web Services",
-    logo: "/lovable-uploads/86f28db5-e756-4d84-90af-9d5f049e7f56.png",
-    compute: {
-      onDemand: {
-        t3Small: { name: "t3.small", hourly: 0.0208, monthly: 15.18 },
-        t3Medium: { name: "t3.medium", hourly: 0.0416, monthly: 30.37 },
-        t3Large: { name: "t3.large", hourly: 0.0832, monthly: 60.74 },
-        m5Large: { name: "m5.large", hourly: 0.096, monthly: 70.08 },
-        m5xLarge: { name: "m5.xlarge", hourly: 0.192, monthly: 140.16 }
+    logo: <Cloud className="h-6 w-6 text-orange-500" />,
+    description: "Wide range of cloud computing services",
+    serviceTypes: [
+      {
+        id: "compute",
+        name: "Compute Services",
+        description: "Virtual servers for running applications",
+        services: [
+          {
+            id: "ec2",
+            name: "EC2 Instances",
+            description: "Virtual servers in the cloud",
+            pricing: {
+              compute: {
+                monthly: 29.2,
+                hourly: 0.0403,
+              },
+              storage: {
+                pricePerGB: 0.10,
+              },
+              database: {
+                monthly: 0,
+              }
+            },
+            features: [
+              "Auto Scaling",
+              "Load Balancing",
+              "Custom AMIs",
+              "Multiple Instance Types"
+            ]
+          },
+          {
+            id: "lambda",
+            name: "Lambda Functions",
+            description: "Run code without provisioning servers",
+            pricing: {
+              compute: {
+                monthly: 8.5,
+                hourly: 0,
+              },
+              storage: {
+                pricePerGB: 0,
+              },
+              database: {
+                monthly: 0,
+              }
+            },
+            features: [
+              "Serverless Architecture",
+              "Pay per execution",
+              "Automatic scaling"
+            ]
+          }
+        ]
       },
-      reserved: {
-        t3Small: { name: "t3.small", hourly: 0.0125, monthly: 9.11 },
-        t3Medium: { name: "t3.medium", hourly: 0.0250, monthly: 18.22 },
-        t3Large: { name: "t3.large", hourly: 0.0499, monthly: 36.44 },
-        m5Large: { name: "m5.large", hourly: 0.0576, monthly: 42.05 },
-        m5xLarge: { name: "m5.xlarge", hourly: 0.1152, monthly: 84.10 }
+      {
+        id: "storage",
+        name: "Storage Services",
+        description: "Scalable cloud storage solutions",
+        services: [
+          {
+            id: "s3",
+            name: "S3 Storage",
+            description: "Object storage for any type of data",
+            pricing: {
+              compute: {
+                monthly: 0,
+                hourly: 0,
+              },
+              storage: {
+                pricePerGB: 0.023,
+              },
+              database: {
+                monthly: 0,
+              }
+            },
+            features: [
+              "Unlimited Storage",
+              "99.999999999% durability",
+              "Lifecycle Policies",
+              "Versioning"
+            ]
+          },
+          {
+            id: "ebs",
+            name: "EBS Volumes",
+            description: "Block storage for EC2 instances",
+            pricing: {
+              compute: {
+                monthly: 0,
+                hourly: 0,
+              },
+              storage: {
+                pricePerGB: 0.10,
+              },
+              database: {
+                monthly: 0,
+              }
+            },
+            features: [
+              "SSD and HDD options",
+              "Snapshots",
+              "Encryption"
+            ]
+          }
+        ]
       },
-      savings: "Up to 40% with 1-year reserved instances"
-    },
-    storage: {
-      s3Standard: { name: "S3 Standard", pricePerGB: 0.023 },
-      s3IntelligentTiering: { name: "S3 Intelligent-Tiering", pricePerGB: 0.0125 },
-      ebs: { name: "EBS General Purpose", pricePerGB: 0.08 }
-    },
-    database: {
-      rdsOnDemand: { name: "RDS MySQL On-Demand", hourly: 0.178, monthly: 130 },
-      rdsReserved: { name: "RDS MySQL Reserved", hourly: 0.107, monthly: 78 }
-    }
+      {
+        id: "database",
+        name: "Database Services",
+        description: "Managed database services",
+        services: [
+          {
+            id: "rds",
+            name: "RDS Database",
+            description: "Managed relational database service",
+            pricing: {
+              compute: {
+                monthly: 0,
+                hourly: 0,
+              },
+              storage: {
+                pricePerGB: 0,
+              },
+              database: {
+                monthly: 45.26,
+              }
+            },
+            features: [
+              "Multiple DB engines",
+              "Automated backups",
+              "Multi-AZ deployment"
+            ]
+          },
+          {
+            id: "dynamodb",
+            name: "DynamoDB",
+            description: "NoSQL database service",
+            pricing: {
+              compute: {
+                monthly: 0,
+                hourly: 0,
+              },
+              storage: {
+                pricePerGB: 0,
+              },
+              database: {
+                monthly: 25.14,
+              }
+            },
+            features: [
+              "Auto scaling",
+              "Global tables",
+              "Serverless"
+            ]
+          }
+        ]
+      }
+    ]
   },
-  azure: {
+  {
+    id: "azure",
     name: "Microsoft Azure",
-    logo: "/lovable-uploads/86f28db5-e756-4d84-90af-9d5f049e7f56.png",
-    compute: {
-      onDemand: {
-        b2s: { name: "B2s", hourly: 0.0208, monthly: 15.18 },
-        b2ms: { name: "B2ms", hourly: 0.0416, monthly: 30.37 },
-        b4ms: { name: "B4ms", hourly: 0.0832, monthly: 60.74 },
-        d2sv3: { name: "D2s v3", hourly: 0.096, monthly: 70.08 },
-        d4sv3: { name: "D4s v3", hourly: 0.192, monthly: 140.16 }
+    logo: <Cloud className="h-6 w-6 text-blue-500" />,
+    description: "Microsoft's cloud computing platform",
+    serviceTypes: [
+      {
+        id: "compute",
+        name: "Compute Services",
+        description: "Virtual machines and containers",
+        services: [
+          {
+            id: "vm",
+            name: "Virtual Machines",
+            description: "Scalable cloud computing",
+            pricing: {
+              compute: {
+                monthly: 30.66,
+                hourly: 0.0426,
+              },
+              storage: {
+                pricePerGB: 0.12,
+              },
+              database: {
+                monthly: 0,
+              }
+            },
+            features: [
+              "Windows & Linux support",
+              "Auto-scaling",
+              "Advanced networking",
+              "High availability"
+            ]
+          },
+          {
+            id: "functions",
+            name: "Azure Functions",
+            description: "Serverless computing service",
+            pricing: {
+              compute: {
+                monthly: 7.9,
+                hourly: 0,
+              },
+              storage: {
+                pricePerGB: 0,
+              },
+              database: {
+                monthly: 0,
+              }
+            },
+            features: [
+              "Serverless architecture",
+              "Pay-per-execution",
+              "Integrated Microsoft tools"
+            ]
+          }
+        ]
       },
-      reserved: {
-        b2s: { name: "B2s", hourly: 0.0125, monthly: 9.11 },
-        b2ms: { name: "B2ms", hourly: 0.0250, monthly: 18.22 },
-        b4ms: { name: "B4ms", hourly: 0.0499, monthly: 36.44 },
-        d2sv3: { name: "D2s v3", hourly: 0.0576, monthly: 42.05 },
-        d4sv3: { name: "D4s v3", hourly: 0.1152, monthly: 84.10 }
+      {
+        id: "storage",
+        name: "Storage Services",
+        description: "Scalable cloud storage solutions",
+        services: [
+          {
+            id: "blob",
+            name: "Blob Storage",
+            description: "Object storage for unstructured data",
+            pricing: {
+              compute: {
+                monthly: 0,
+                hourly: 0,
+              },
+              storage: {
+                pricePerGB: 0.0184,
+              },
+              database: {
+                monthly: 0,
+              }
+            },
+            features: [
+              "Tiered storage",
+              "Lifecycle management",
+              "Data redundancy"
+            ]
+          },
+          {
+            id: "disk",
+            name: "Azure Disk Storage",
+            description: "Block-level storage volumes",
+            pricing: {
+              compute: {
+                monthly: 0,
+                hourly: 0,
+              },
+              storage: {
+                pricePerGB: 0.095,
+              },
+              database: {
+                monthly: 0,
+              }
+            },
+            features: [
+              "SSD & HDD options",
+              "Snapshots",
+              "Disk encryption"
+            ]
+          }
+        ]
       },
-      savings: "Up to 40% with 1-year reserved instances"
-    },
-    storage: {
-      blobHot: { name: "Blob Storage (Hot)", pricePerGB: 0.0184 },
-      blobCool: { name: "Blob Storage (Cool)", pricePerGB: 0.01 },
-      managedDisk: { name: "Managed Disk (SSD)", pricePerGB: 0.0765 }
-    },
-    database: {
-      sqlOnDemand: { name: "Azure SQL On-Demand", hourly: 0.17, monthly: 124 },
-      sqlReserved: { name: "Azure SQL Reserved", hourly: 0.102, monthly: 74.4 }
-    }
-  }
-};
-
-// Optimization recommendations
-const recommendations = [
-  {
-    title: "Right-Size Your Instances",
-    description: "Analyze instance utilization and downsize or upgrade based on actual needs. We've identified 40% of your instances are underutilized.",
-    icon: <Server className="h-10 w-10 text-blue-500" />,
-    savings: "25-30%",
-    implementation: "Medium",
-    details: "Many instances in your environment are running at less than 20% CPU utilization. Consider downsizing these instances to a smaller instance type or consolidating workloads."
-  },
-  {
-    title: "Reserved Instances",
-    description: "Convert predictable workloads to reserved instances for significant discounts on the hourly rate.",
-    icon: <Cpu className="h-10 w-10 text-purple-500" />,
-    savings: "30-40%",
-    implementation: "Easy",
-    details: "By committing to a 1-year term for your stable workloads, you can save up to 40% compared to on-demand pricing. This is ideal for applications that run consistently throughout the year."
-  },
-  {
-    title: "Storage Lifecycle Policies",
-    description: "Implement tiered storage to automatically move infrequently accessed data to lower-cost storage classes.",
-    icon: <HardDrive className="h-10 w-10 text-green-500" />,
-    savings: "15-25%",
-    implementation: "Easy",
-    details: "Configure lifecycle policies to automatically transition objects to S3 Infrequent Access or Glacier storage classes after 30 days of no access, reducing storage costs significantly."
-  },
-  {
-    title: "Database Optimization",
-    description: "Consolidate databases and optimize query performance to reduce compute requirements and operation costs.",
-    icon: <Database className="h-10 w-10 text-yellow-500" />,
-    savings: "20-35%",
-    implementation: "Complex",
-    details: "Consider using read replicas for read-heavy workloads, optimizing queries with proper indexing, and using managed database services that automatically scale resources based on demand."
-  },
-  {
-    title: "Shutdown Dev/Test Environments",
-    description: "Automatically shutdown non-production environments during off-hours to reduce compute costs.",
-    icon: <CloudOff className="h-10 w-10 text-red-500" />,
-    savings: "40-60%",
-    implementation: "Easy",
-    details: "Implement automated start/stop schedules for development and testing environments to run only during working hours (e.g., 8am-6pm on weekdays), potentially saving 70+ hours of runtime costs per week."
+      {
+        id: "database",
+        name: "Database Services",
+        description: "Managed database services",
+        services: [
+          {
+            id: "sql",
+            name: "Azure SQL Database",
+            description: "Managed SQL database service",
+            pricing: {
+              compute: {
+                monthly: 0,
+                hourly: 0,
+              },
+              storage: {
+                pricePerGB: 0,
+              },
+              database: {
+                monthly: 42.34,
+              }
+            },
+            features: [
+              "Automatic tuning",
+              "Advanced security",
+              "High availability"
+            ]
+          },
+          {
+            id: "cosmos",
+            name: "Cosmos DB",
+            description: "Globally distributed database service",
+            pricing: {
+              compute: {
+                monthly: 0,
+                hourly: 0,
+              },
+              storage: {
+                pricePerGB: 0,
+              },
+              database: {
+                monthly: 31.25,
+              }
+            },
+            features: [
+              "Multi-model database",
+              "Global distribution",
+              "Multiple consistency models"
+            ]
+          }
+        ]
+      }
+    ]
   }
 ];
 
-const CloudCostOptimizer = () => {
+// Recommendations storage
+const costRecommendations = [
+  {
+    id: 1,
+    title: "Right-size underutilized resources",
+    description: "Analyze resource usage patterns and downsize instances that are consistently underutilized.",
+    saving: "15-30%",
+    effort: "medium",
+    category: "compute"
+  },
+  {
+    id: 2,
+    title: "Implement auto-scaling",
+    description: "Set up auto-scaling to automatically adjust resources based on demand.",
+    saving: "10-25%",
+    effort: "medium",
+    category: "compute"
+  },
+  {
+    id: 3,
+    title: "Utilize spot/preemptible instances",
+    description: "Use spot instances for non-critical, fault-tolerant workloads to save on compute costs.",
+    saving: "60-90%",
+    effort: "high",
+    category: "compute"
+  },
+  {
+    id: 4,
+    title: "Implement storage lifecycle policies",
+    description: "Move infrequently accessed data to lower-cost storage tiers automatically.",
+    saving: "40-70%",
+    effort: "low",
+    category: "storage"
+  },
+  {
+    id: 5,
+    title: "Database optimization",
+    description: "Optimize database resources by using appropriate instance types and storage options.",
+    saving: "20-35%",
+    effort: "high",
+    category: "database"
+  },
+  {
+    id: 6,
+    title: "Reserved instances/savings plans",
+    description: "Purchase reserved instances or savings plans for predictable workloads.",
+    saving: "30-75%",
+    effort: "low",
+    category: "general"
+  },
+  {
+    id: 7,
+    title: "Remove unused resources",
+    description: "Identify and eliminate idle or unused resources that are still incurring costs.",
+    saving: "100% of unused",
+    effort: "low",
+    category: "general"
+  }
+];
+
+export default function CloudCostOptimizer() {
   const { toast } = useToast();
-  const [currentView, setCurrentView] = useState<'calculator' | 'recommendations'>('calculator');
-  const [cloudProvider, setCloudProvider] = useState<'aws' | 'azure'>('aws');
-  const [selectedComputeType, setSelectedComputeType] = useState<string>('t3Medium');
-  const [selectedStorageType, setSelectedStorageType] = useState<string>('s3Standard');
-  const [selectedDatabaseType, setSelectedDatabaseType] = useState<string>('rdsOnDemand');
-  const [showDetailDialog, setShowDetailDialog] = useState(false);
-  const [selectedRecommendation, setSelectedRecommendation] = useState<any>(null);
+  const [selectedProvider, setSelectedProvider] = useState<string>("aws");
+  const [selectedServiceType, setSelectedServiceType] = useState<string>("compute");
+  const [selectedService, setSelectedService] = useState<string>("ec2");
+  const [computeUnits, setComputeUnits] = useState<number>(5);
+  const [storageGB, setStorageGB] = useState<number>(100);
+  const [databaseInstances, setDatabaseInstances] = useState<number>(1);
+  const [monthlyEstimate, setMonthlyEstimate] = useState<number>(0);
+  const [yearlyEstimate, setYearlyEstimate] = useState<number>(0);
+  const [savings, setSavings] = useState<number>(0);
+  const [selectedRecommendations, setSelectedRecommendations] = useState<number[]>([]);
+  const [isOptimizing, setIsOptimizing] = useState<boolean>(false);
+
+  // Get the current provider data
+  const currentProvider = cloudProviders.find(provider => provider.id === selectedProvider);
   
-  const [formData, setFormData] = useState({
-    instances: 5,
-    instanceType: selectedComputeType,
-    storage: 500,
-    storageType: selectedStorageType,
-    database: 3,
-    databaseType: selectedDatabaseType,
-    networking: 100,
-    reserved: 20,
-  });
+  // Get the current service type data
+  const currentServiceType = currentProvider?.serviceTypes.find(type => type.id === selectedServiceType);
   
-  const [optimizedCost, setOptimizedCost] = useState<number | null>(null);
-  const [currentCost, setCurrentCost] = useState<number | null>(null);
-  const [savings, setSavings] = useState<number | null>(null);
-  const [optimizationBreakdown, setOptimizationBreakdown] = useState<any>(null);
+  // Get the current service data
+  const currentService = currentServiceType?.services.find(service => service.id === selectedService);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: parseFloat(value) || 0
-    }));
+  // Calculate cost
+  useEffect(() => {
+    if (currentService) {
+      // Calculate base costs
+      const computeCost = currentService.pricing.compute.monthly * computeUnits;
+      const storageCost = currentService.pricing.storage.pricePerGB * storageGB;
+      const databaseCost = currentService.pricing.database.monthly * databaseInstances;
+      
+      // Calculate total
+      const total = computeCost + storageCost + databaseCost;
+      setMonthlyEstimate(total);
+      setYearlyEstimate(total * 12);
+      
+      // Calculate savings
+      let savingsPercent = 0;
+      selectedRecommendations.forEach(recId => {
+        const rec = costRecommendations.find(r => r.id === recId);
+        if (rec) {
+          // Extract numeric value from saving percentage range
+          const savingStr = rec.saving.split('-')[0].replace(/[^0-9]/g, '');
+          const savingValue = parseInt(savingStr, 10) / 100;
+          
+          // Apply category-specific savings
+          if (rec.category === 'general' || rec.category === selectedServiceType) {
+            savingsPercent += savingValue;
+          }
+        }
+      });
+      
+      // Cap savings at 90%
+      savingsPercent = Math.min(savingsPercent, 0.9);
+      setSavings(total * savingsPercent);
+      
+    }
+  }, [currentService, computeUnits, storageGB, databaseInstances, selectedRecommendations, selectedServiceType]);
+
+  // Handle recommendation toggle
+  const toggleRecommendation = (recId: number) => {
+    if (selectedRecommendations.includes(recId)) {
+      setSelectedRecommendations(selectedRecommendations.filter(id => id !== recId));
+    } else {
+      setSelectedRecommendations([...selectedRecommendations, recId]);
+    }
   };
 
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const handleOptimize = () => {
+    setIsOptimizing(true);
     
-    if (name === 'instanceType') {
-      setSelectedComputeType(value);
-    } else if (name === 'storageType') {
-      setSelectedStorageType(value);
-    } else if (name === 'databaseType') {
-      setSelectedDatabaseType(value);
-    }
-  };
-
-  const calculateCosts = () => {
-    // Get current provider data
-    const provider = cloudProviders[cloudProvider];
-    
-    // Calculate compute costs based on selected instance type
-    const instanceType = selectedComputeType;
-    let instanceCost;
-    
-    if (cloudProvider === 'aws') {
-      instanceCost = formData.instances * provider.compute.onDemand[instanceType as keyof typeof provider.compute.onDemand].monthly;
-    } else {
-      instanceCost = formData.instances * provider.compute.onDemand[instanceType as keyof typeof provider.compute.onDemand].monthly;
-    }
-    
-    // Calculate storage costs
-    const storageType = selectedStorageType;
-    let storageCost;
-    
-    if (cloudProvider === 'aws') {
-      storageCost = formData.storage * provider.storage[storageType as keyof typeof provider.storage].pricePerGB;
-    } else {
-      storageCost = formData.storage * provider.storage[storageType as keyof typeof provider.storage].pricePerGB;
-    }
-    
-    // Calculate database costs
-    const databaseType = selectedDatabaseType;
-    let databaseCost;
-    
-    if (cloudProvider === 'aws') {
-      databaseCost = formData.database * provider.database[databaseType as keyof typeof provider.database].monthly;
-    } else {
-      databaseCost = formData.database * provider.database[databaseType as keyof typeof provider.database].monthly;
-    }
-    
-    // Calculate networking costs (simplified)
-    const networkingCost = formData.networking * 0.15;
-    
-    // Calculate total current cost
-    const currentTotalCost = instanceCost + storageCost + databaseCost + networkingCost;
-    
-    // Calculate optimized costs with potential savings
-    const reservedDiscount = formData.reserved / 100;
-    
-    // Instance optimization
-    const instanceOptimized = instanceCost * (1 - (reservedDiscount * 0.40));
-    
-    // Storage optimization (tiered storage strategies)
-    const storageOptimized = storageCost * 0.7;
-    
-    // Database optimization
-    const databaseOptimized = databaseCost * 0.8;
-    
-    // Networking optimization
-    const networkingOptimized = networkingCost * 0.9;
-    
-    // Calculate total optimized cost
-    const optimizedTotalCost = instanceOptimized + storageOptimized + databaseOptimized + networkingOptimized;
-    
-    // Calculate total savings
-    const savingsAmount = currentTotalCost - optimizedTotalCost;
-    
-    // Set state with calculated values
-    setCurrentCost(Math.round(currentTotalCost));
-    setOptimizedCost(Math.round(optimizedTotalCost));
-    setSavings(Math.round(savingsAmount));
-    
-    // Set breakdown details for more detailed analysis
-    setOptimizationBreakdown({
-      compute: {
-        original: Math.round(instanceCost),
-        optimized: Math.round(instanceOptimized),
-        savings: Math.round(instanceCost - instanceOptimized)
-      },
-      storage: {
-        original: Math.round(storageCost),
-        optimized: Math.round(storageOptimized),
-        savings: Math.round(storageCost - storageOptimized)
-      },
-      database: {
-        original: Math.round(databaseCost),
-        optimized: Math.round(databaseOptimized),
-        savings: Math.round(databaseCost - databaseOptimized)
-      },
-      networking: {
-        original: Math.round(networkingCost),
-        optimized: Math.round(networkingOptimized),
-        savings: Math.round(networkingCost - networkingOptimized)
-      }
-    });
-    
-    toast({
-      title: "Cost Analysis Complete",
-      description: `Potential monthly savings: $${Math.round(savingsAmount)}`,
-    });
-  };
-
-  const viewRecommendationDetails = (recommendation: any) => {
-    setSelectedRecommendation(recommendation);
-    setShowDetailDialog(true);
+    // Simulate optimization process
+    setTimeout(() => {
+      setIsOptimizing(false);
+      toast({
+        title: "Cost Optimization Complete",
+        description: `We've identified potential savings of $${savings.toFixed(2)} per month.`,
+        variant: "default",
+      });
+    }, 2000);
   };
 
   return (
-    <div className="container mx-auto space-y-6">
-      <div className="flex flex-col md:flex-row items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold mb-4 md:mb-0">
-          <span className="bg-gradient-to-r from-evolve-blue-500 via-evolve-purple-500 to-evolve-teal-500 bg-clip-text text-transparent flex items-center">
-            <CloudCog className="h-8 w-8 mr-2" />
-            Cloud Cost Optimizer
-          </span>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight gradient-text inline-block mb-2">
+          Cloud Cost Optimizer
         </h1>
-        <div className="flex space-x-2">
-          <Button 
-            variant={currentView === 'calculator' ? 'default' : 'outline'} 
-            onClick={() => setCurrentView('calculator')}
-            className="gap-2"
-          >
-            <DollarSign className="h-4 w-4" />
-            Cost Calculator
-          </Button>
-          <Button 
-            variant={currentView === 'recommendations' ? 'default' : 'outline'} 
-            onClick={() => setCurrentView('recommendations')}
-            className="gap-2"
-          >
-            <BarChart className="h-4 w-4" />
-            Recommendations
-          </Button>
-        </div>
+        <p className="text-muted-foreground">
+          Analyze and optimize your cloud costs across major platforms
+        </p>
       </div>
 
-      {currentView === 'calculator' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Cloud Cost Calculator</span>
-                <Tabs defaultValue={cloudProvider} className="w-[200px]">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="aws" onClick={() => setCloudProvider('aws')}>AWS</TabsTrigger>
-                    <TabsTrigger value="azure" onClick={() => setCloudProvider('azure')}>Azure</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="instances">Number of VM Instances</Label>
-                    <Input 
-                      id="instances"
-                      name="instances"
-                      type="number" 
-                      min="0"
-                      value={formData.instances} 
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="instanceType">Instance Type</Label>
-                    {cloudProvider === 'aws' ? (
-                      <Select 
-                        value={selectedComputeType} 
-                        onValueChange={(value) => handleSelectChange('instanceType', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select instance type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="t3Small">{cloudProviders.aws.compute.onDemand.t3Small.name} (${cloudProviders.aws.compute.onDemand.t3Small.monthly}/mo)</SelectItem>
-                          <SelectItem value="t3Medium">{cloudProviders.aws.compute.onDemand.t3Medium.name} (${cloudProviders.aws.compute.onDemand.t3Medium.monthly}/mo)</SelectItem>
-                          <SelectItem value="t3Large">{cloudProviders.aws.compute.onDemand.t3Large.name} (${cloudProviders.aws.compute.onDemand.t3Large.monthly}/mo)</SelectItem>
-                          <SelectItem value="m5Large">{cloudProviders.aws.compute.onDemand.m5Large.name} (${cloudProviders.aws.compute.onDemand.m5Large.monthly}/mo)</SelectItem>
-                          <SelectItem value="m5xLarge">{cloudProviders.aws.compute.onDemand.m5xLarge.name} (${cloudProviders.aws.compute.onDemand.m5xLarge.monthly}/mo)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <Select 
-                        value={selectedComputeType} 
-                        onValueChange={(value) => handleSelectChange('instanceType', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select instance type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="b2s">{cloudProviders.azure.compute.onDemand.b2s.name} (${cloudProviders.azure.compute.onDemand.b2s.monthly}/mo)</SelectItem>
-                          <SelectItem value="b2ms">{cloudProviders.azure.compute.onDemand.b2ms.name} (${cloudProviders.azure.compute.onDemand.b2ms.monthly}/mo)</SelectItem>
-                          <SelectItem value="b4ms">{cloudProviders.azure.compute.onDemand.b4ms.name} (${cloudProviders.azure.compute.onDemand.b4ms.monthly}/mo)</SelectItem>
-                          <SelectItem value="d2sv3">{cloudProviders.azure.compute.onDemand.d2sv3.name} (${cloudProviders.azure.compute.onDemand.d2sv3.monthly}/mo)</SelectItem>
-                          <SelectItem value="d4sv3">{cloudProviders.azure.compute.onDemand.d4sv3.name} (${cloudProviders.azure.compute.onDemand.d4sv3.monthly}/mo)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="storage">Storage (GB)</Label>
-                    <Input 
-                      id="storage"
-                      name="storage"
-                      type="number" 
-                      min="0"
-                      value={formData.storage} 
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="storageType">Storage Type</Label>
-                    {cloudProvider === 'aws' ? (
-                      <Select 
-                        value={selectedStorageType} 
-                        onValueChange={(value) => handleSelectChange('storageType', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select storage type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="s3Standard">{cloudProviders.aws.storage.s3Standard.name} (${cloudProviders.aws.storage.s3Standard.pricePerGB}/GB)</SelectItem>
-                          <SelectItem value="s3IntelligentTiering">{cloudProviders.aws.storage.s3IntelligentTiering.name} (${cloudProviders.aws.storage.s3IntelligentTiering.pricePerGB}/GB)</SelectItem>
-                          <SelectItem value="ebs">{cloudProviders.aws.storage.ebs.name} (${cloudProviders.aws.storage.ebs.pricePerGB}/GB)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <Select 
-                        value={selectedStorageType} 
-                        onValueChange={(value) => handleSelectChange('storageType', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select storage type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="blobHot">{cloudProviders.azure.storage.blobHot.name} (${cloudProviders.azure.storage.blobHot.pricePerGB}/GB)</SelectItem>
-                          <SelectItem value="blobCool">{cloudProviders.azure.storage.blobCool.name} (${cloudProviders.azure.storage.blobCool.pricePerGB}/GB)</SelectItem>
-                          <SelectItem value="managedDisk">{cloudProviders.azure.storage.managedDisk.name} (${cloudProviders.azure.storage.managedDisk.pricePerGB}/GB)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="database">Database Instances</Label>
-                    <Input 
-                      id="database"
-                      name="database"
-                      type="number" 
-                      min="0"
-                      value={formData.database} 
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="databaseType">Database Type</Label>
-                    {cloudProvider === 'aws' ? (
-                      <Select 
-                        value={selectedDatabaseType} 
-                        onValueChange={(value) => handleSelectChange('databaseType', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select database type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="rdsOnDemand">{cloudProviders.aws.database.rdsOnDemand.name} (${cloudProviders.aws.database.rdsOnDemand.monthly}/mo)</SelectItem>
-                          <SelectItem value="rdsReserved">{cloudProviders.aws.database.rdsReserved.name} (${cloudProviders.aws.database.rdsReserved.monthly}/mo)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <Select 
-                        value={selectedDatabaseType} 
-                        onValueChange={(value) => handleSelectChange('databaseType', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select database type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="sqlOnDemand">{cloudProviders.azure.database.sqlOnDemand.name} (${cloudProviders.azure.database.sqlOnDemand.monthly}/mo)</SelectItem>
-                          <SelectItem value="sqlReserved">{cloudProviders.azure.database.sqlReserved.name} (${cloudProviders.azure.database.sqlReserved.monthly}/mo)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="networking">Data Transfer (GB)</Label>
-                    <Input 
-                      id="networking"
-                      name="networking"
-                      type="number" 
-                      min="0"
-                      value={formData.networking} 
-                      onChange={handleInputChange}
-                    />
-                    <p className="text-xs text-muted-foreground">$0.15 per GB/month</p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="reserved">
-                      Percentage of workloads that can use reserved instances (%)
-                    </Label>
-                    <Input 
-                      id="reserved"
-                      name="reserved"
-                      type="number" 
-                      min="0"
-                      max="100"
-                      value={formData.reserved} 
-                      onChange={handleInputChange}
-                    />
-                    <p className="text-xs text-muted-foreground">Higher percentages lead to greater savings</p>
-                  </div>
-                </div>
-              </div>
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Server className="h-5 w-5 text-blue-500 mr-2" />
+              Cloud Service Calculator
+            </CardTitle>
+            <CardDescription>
+              Estimate and compare cloud costs across providers and services
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue={selectedProvider} onValueChange={setSelectedProvider}>
+              <TabsList className="grid w-full grid-cols-2">
+                {cloudProviders.map(provider => (
+                  <TabsTrigger key={provider.id} value={provider.id} className="flex items-center gap-2">
+                    {provider.logo}
+                    <span>{provider.name}</span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
               
-              <Button className="w-full" onClick={calculateCosts}>
-                Calculate Potential Savings
-              </Button>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Cost Analysis</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {currentCost !== null && optimizedCost !== null && savings !== null ? (
-                <>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm font-medium">Current Monthly Cost</span>
-                        <span className="text-sm font-bold">${currentCost}</span>
-                      </div>
-                      <Progress value={100} className="h-2" />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm font-medium">Optimized Monthly Cost</span>
-                        <span className="text-sm font-bold">${optimizedCost}</span>
-                      </div>
-                      <Progress value={(optimizedCost / currentCost) * 100} className="h-2" />
-                    </div>
-                    
-                    <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">Monthly Savings</span>
-                        <span className="text-lg font-bold text-green-600 dark:text-green-400">${savings}</span>
-                      </div>
-                      <div className="mt-2">
-                        <span className="text-sm">Annual Savings: <span className="font-bold">${savings * 12}</span></span>
-                      </div>
-                    </div>
-                    
-                    {optimizationBreakdown && (
-                      <div className="space-y-3">
-                        <h3 className="text-sm font-medium">Savings Breakdown</h3>
-                        
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                          <div className="bg-muted/30 p-2 rounded">
-                            <div className="font-medium">Compute</div>
-                            <div className="text-green-600">-${optimizationBreakdown.compute.savings}</div>
+              {cloudProviders.map(provider => (
+                <TabsContent key={provider.id} value={provider.id} className="space-y-4 pt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {provider.serviceTypes.map(serviceType => (
+                      <Card 
+                        key={serviceType.id} 
+                        className={`cursor-pointer transition-all hover:shadow-md ${
+                          selectedServiceType === serviceType.id ? 'border-2 border-primary' : ''
+                        }`}
+                        onClick={() => setSelectedServiceType(serviceType.id)}
+                      >
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm flex items-center">
+                            {serviceType.id === 'compute' && <Server className="h-4 w-4 mr-2" />}
+                            {serviceType.id === 'storage' && <HardDrive className="h-4 w-4 mr-2" />}
+                            {serviceType.id === 'database' && <Database className="h-4 w-4 mr-2" />}
+                            {serviceType.name}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="text-xs text-muted-foreground">
+                          {serviceType.description}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                  
+                  {/* Service Selection */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    {currentProvider?.serviceTypes
+                      .find(type => type.id === selectedServiceType)?.services
+                      .map(service => (
+                        <Card 
+                          key={service.id} 
+                          className={`cursor-pointer transition-all hover:shadow-md ${
+                            selectedService === service.id ? 'border-2 border-primary' : ''
+                          }`}
+                          onClick={() => setSelectedService(service.id)}
+                        >
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-sm flex justify-between items-center">
+                              <span>{service.name}</span>
+                              {selectedService === service.id && (
+                                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                              )}
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            <p className="text-xs text-muted-foreground">{service.description}</p>
+                            <div className="flex flex-wrap gap-1">
+                              {service.features.map((feature, index) => (
+                                <Badge key={index} variant="outline" className="text-xs">
+                                  {feature}
+                                </Badge>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    }
+                  </div>
+                  
+                  {/* Resource Configuration */}
+                  <Card className="mt-4">
+                    <CardHeader>
+                      <CardTitle className="text-sm">Resource Configuration</CardTitle>
+                      <CardDescription>Adjust your resource needs</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <Label htmlFor="compute-slider">Compute Units</Label>
+                          <span className="text-sm font-medium">{computeUnits}</span>
+                        </div>
+                        <Slider 
+                          id="compute-slider"
+                          min={1} 
+                          max={20} 
+                          step={1} 
+                          value={[computeUnits]}
+                          onValueChange={(value) => setComputeUnits(value[0])}
+                        />
+                        {currentService && (
+                          <div className="text-xs text-muted-foreground">
+                            ${currentService.pricing.compute.monthly.toFixed(2)} per unit monthly
                           </div>
-                          
-                          <div className="bg-muted/30 p-2 rounded">
-                            <div className="font-medium">Storage</div>
-                            <div className="text-green-600">-${optimizationBreakdown.storage.savings}</div>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <Label htmlFor="storage-slider">Storage (GB)</Label>
+                          <span className="text-sm font-medium">{storageGB}</span>
+                        </div>
+                        <Slider 
+                          id="storage-slider"
+                          min={10} 
+                          max={1000} 
+                          step={10} 
+                          value={[storageGB]}
+                          onValueChange={(value) => setStorageGB(value[0])}
+                        />
+                        {currentService && (
+                          <div className="text-xs text-muted-foreground">
+                            ${currentService.pricing.storage.pricePerGB.toFixed(4)} per GB
                           </div>
-                          
-                          <div className="bg-muted/30 p-2 rounded">
-                            <div className="font-medium">Database</div>
-                            <div className="text-green-600">-${optimizationBreakdown.database.savings}</div>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <Label htmlFor="database-slider">Database Instances</Label>
+                          <span className="text-sm font-medium">{databaseInstances}</span>
+                        </div>
+                        <Slider 
+                          id="database-slider"
+                          min={0} 
+                          max={5} 
+                          step={1} 
+                          value={[databaseInstances]}
+                          onValueChange={(value) => setDatabaseInstances(value[0])}
+                        />
+                        {currentService && (
+                          <div className="text-xs text-muted-foreground">
+                            ${currentService.pricing.database.monthly.toFixed(2)} per instance monthly
                           </div>
-                          
-                          <div className="bg-muted/30 p-2 rounded">
-                            <div className="font-medium">Networking</div>
-                            <div className="text-green-600">-${optimizationBreakdown.networking.savings}</div>
-                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-between border-t pt-4">
+                      <div>
+                        <p className="text-sm font-medium">Estimated Monthly Cost</p>
+                        <p className="text-2xl font-bold">${monthlyEstimate.toFixed(2)}</p>
+                        <p className="text-xs text-muted-foreground">${yearlyEstimate.toFixed(2)} annually</p>
+                      </div>
+                      <Button onClick={handleOptimize} disabled={isOptimizing}>
+                        {isOptimizing ? (
+                          <>
+                            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                            Optimizing...
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="h-4 w-4 mr-2" />
+                            Optimize Costs
+                          </>
+                        )}
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </TabsContent>
+              ))}
+            </Tabs>
+          </CardContent>
+        </Card>
+        
+        <Card className="md:row-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <DollarSign className="h-5 w-5 text-green-500 mr-2" />
+              Cost Optimization
+            </CardTitle>
+            <CardDescription>
+              Optimization recommendations and potential savings
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-lg border p-3 bg-green-50 dark:bg-green-900/20">
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="font-medium text-sm">Potential Monthly Savings</h4>
+                <Badge variant="outline" className="bg-green-100 text-green-800">
+                  {savings > 0 ? (savings / monthlyEstimate * 100).toFixed(0) : 0}% reduction
+                </Badge>
+              </div>
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                ${savings.toFixed(2)}
+              </div>
+              <Progress value={(savings / monthlyEstimate) * 100} className="h-2 mt-2" />
+            </div>
+            
+            <div>
+              <h4 className="font-medium text-sm mb-3">Optimization Recommendations</h4>
+              <ScrollArea className="h-96 rounded-md border p-2">
+                <div className="space-y-3">
+                  {costRecommendations.map(rec => {
+                    const isSelected = selectedRecommendations.includes(rec.id);
+                    return (
+                      <div 
+                        key={rec.id}
+                        className={`p-3 rounded-lg border cursor-pointer hover:bg-accent/10 transition-colors ${
+                          isSelected ? 'border-primary bg-primary/5' : ''
+                        }`}
+                        onClick={() => toggleRecommendation(rec.id)}
+                      >
+                        <div className="flex justify-between items-start mb-1">
+                          <h5 className="font-medium text-sm flex items-center">
+                            {isSelected && <CheckCircle2 className="h-4 w-4 text-green-500 mr-1.5" />}
+                            {rec.title}
+                          </h5>
+                          <Badge>
+                            {rec.saving}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-2">{rec.description}</p>
+                        <div className="flex justify-between text-xs">
+                          <Badge variant="outline" className="capitalize">
+                            {rec.category}
+                          </Badge>
+                          <span className={`
+                            ${rec.effort === 'low' ? 'text-green-600' : 
+                              rec.effort === 'medium' ? 'text-amber-600' : 'text-red-600'}
+                          `}>
+                            {rec.effort} effort
+                          </span>
                         </div>
                       </div>
-                    )}
-                  </div>
-                  
-                  <Button 
-                    onClick={() => setCurrentView('recommendations')} 
-                    variant="outline" 
-                    className="w-full"
-                  >
-                    View Optimization Recommendations
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-64 text-center space-y-4">
-                  <DollarSign className="h-16 w-16 text-muted-foreground/50" />
-                  <p className="text-muted-foreground">Enter your cloud resource details and calculate to see potential savings.</p>
+                    );
+                  })}
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Top Optimization Recommendations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {recommendations.map((rec, index) => (
-                  <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="p-2 bg-muted rounded-full">
-                        {rec.icon}
-                      </div>
-                      <h3 className="font-medium text-lg">{rec.title}</h3>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-4">{rec.description}</p>
-                    <div className="grid grid-cols-2 gap-2 mb-4">
-                      <div>
-                        <span className="text-xs text-muted-foreground">Potential Savings</span>
-                        <p className="font-bold text-green-600 dark:text-green-400">{rec.savings}</p>
-                      </div>
-                      <div>
-                        <span className="text-xs text-muted-foreground">Implementation</span>
-                        <p className="font-medium">{rec.implementation}</p>
-                      </div>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full"
-                      onClick={() => viewRecommendationDetails(rec)}
-                    >
-                      View Details
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Button onClick={() => setCurrentView('calculator')} variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Calculator
-          </Button>
-        </div>
-      )}
-      
-      <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {selectedRecommendation?.icon}
-              {selectedRecommendation?.title}
-            </DialogTitle>
-            <DialogDescription>
-              Implementation difficulty: {selectedRecommendation?.implementation}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div className="p-4 bg-muted/20 rounded-lg">
-              <p>{selectedRecommendation?.details}</p>
+              </ScrollArea>
             </div>
-            
-            <div className="flex justify-between items-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <span>Potential Savings</span>
-              <span className="font-bold text-green-600">{selectedRecommendation?.savings}</span>
+          </CardContent>
+          <CardFooter className="flex justify-between border-t pt-4">
+            <div className="grid grid-cols-2 gap-2 w-full">
+              <Button variant="outline" className="w-full">
+                <BarChart4 className="h-4 w-4 mr-2" />
+                Export Report
+              </Button>
+              <Button variant="outline" className="w-full">
+                <Award className="h-4 w-4 mr-2" />
+                Best Practices
+              </Button>
             </div>
-            
-            <div className="space-y-2">
-              <h4 className="font-medium">Implementation Steps:</h4>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Analyze current usage patterns using cloud provider monitoring tools</li>
-                <li>Identify resources that match this optimization pattern</li>
-                <li>Create implementation plan with minimal service disruption</li>
-                <li>Test changes in a staging environment</li>
-                <li>Gradually roll out to production with monitoring</li>
-              </ul>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button onClick={() => setShowDetailDialog(false)}>Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   );
-};
-
-export default CloudCostOptimizer;
+}

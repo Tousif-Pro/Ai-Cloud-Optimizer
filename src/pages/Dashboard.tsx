@@ -4,7 +4,7 @@ import { MetricChart } from "@/components/dashboard/MetricChart";
 import { CompetitorTracker } from "@/components/dashboard/CompetitorTracker";
 import { ResourceAllocation } from "@/components/dashboard/ResourceAllocation";
 import { TrendInsight } from "@/components/dashboard/TrendInsight";
-import { ChartBar, Users, Database, Search, Calendar } from "lucide-react";
+import { ChartBar, Users, Database, Search } from "lucide-react";
 
 // Sample data for charts
 const revenueData = [
@@ -27,11 +27,40 @@ const acquisitionData = [
   { name: "Jul", value: 48 },
 ];
 
+// Updated competitors data with strengths and weaknesses
 const competitors = [
-  { name: "AI Tech Solutions", marketShare: 35, growth: 5, color: "#1a237e" },
-  { name: "DataMind Corp", marketShare: 28, growth: -2, color: "#4a148c" },
-  { name: "Neural Systems", marketShare: 19, growth: 3, color: "#006064" },
-  { name: "IntelliProcess AI", marketShare: 12, growth: 8, color: "#0d47a1" },
+  { 
+    name: "Your Company", 
+    value: 78, 
+    color: "bg-blue-500", 
+    growth: 12,
+    strength: "AI-driven analytics platform",
+    weakness: "Limited global presence"
+  },
+  { 
+    name: "Competitor A", 
+    value: 65, 
+    color: "bg-purple-500", 
+    growth: 8,
+    strength: "Strong enterprise partnerships",
+    weakness: "Outdated technology stack"
+  },
+  { 
+    name: "Competitor B", 
+    value: 49, 
+    color: "bg-green-500", 
+    growth: -3,
+    strength: "Cost-effective solutions",
+    weakness: "Poor customer support"
+  },
+  { 
+    name: "Competitor C", 
+    value: 42, 
+    color: "bg-yellow-500", 
+    growth: 5,
+    strength: "Innovative R&D department",
+    weakness: "Complex pricing structure"
+  },
 ];
 
 const resourceAllocationData = [
