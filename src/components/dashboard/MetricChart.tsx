@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -10,6 +10,12 @@ interface MetricChartProps {
   dataKey: string;
   color?: string;
   className?: string;
+  showGrid?: boolean;
+  showAverage?: boolean;
+  showGradient?: boolean;
+  smooth?: boolean;
+  tooltipPrefix?: string;
+  tooltipSuffix?: string;
 }
 
 export function MetricChart({
@@ -18,8 +24,34 @@ export function MetricChart({
   dataKey,
   color = "#9b87f5",
   className,
+  showGrid = true,
+  showAverage = false,
+  showGradient = true,
+  smooth = true,
+  tooltipPrefix = "",
+  tooltipSuffix = "",
 }: MetricChartProps) {
   const isMobile = useIsMobile();
+  
+  // Calculate average if needed
+  const average = showAverage
+    ? data.reduce((sum, item) => sum + item[dataKey], 0) / data.length
+    : null;
+  
+  // Custom tooltip component
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-xl border border-gray-100 dark:border-gray-700">
+          <p className="font-medium">{label}</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300">
+            {tooltipPrefix}{payload[0].value}{tooltipSuffix}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
   
   return (
     <Card className={cn("dashboard-card overflow-hidden border-none shadow-lg", className)}>
@@ -43,37 +75,65 @@ export function MetricChart({
                   <stop offset="5%" stopColor={color} stopOpacity={0.8}/>
                   <stop offset="95%" stopColor={color} stopOpacity={0.1}/>
                 </linearGradient>
+                
+                {/* Add a more premium gradient with multiple color stops */}
+                <linearGradient id={`premiumGradient-${title.replace(/\s+/g, '')}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={color} stopOpacity={0.9}/>
+                  <stop offset="40%" stopColor={color} stopOpacity={0.6}/>
+                  <stop offset="70%" stopColor={color} stopOpacity={0.4}/>
+                  <stop offset="95%" stopColor={color} stopOpacity={0.1}/>
+                </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" opacity={0.1} vertical={false} />
+              
+              {showGrid && (
+                <CartesianGrid 
+                  strokeDasharray="3 3" 
+                  opacity={0.1} 
+                  vertical={false}
+                  stroke="#e5e7eb" 
+                />
+              )}
+              
               <XAxis 
                 dataKey="name" 
                 tick={{ fontSize: 11 }} 
                 tickLine={false}
                 axisLine={{ stroke: '#e5e7eb', strokeWidth: 1 }}
               />
+              
               <YAxis 
                 tick={{ fontSize: 11 }} 
                 tickLine={false}
                 axisLine={false}
                 width={30}
               />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                  borderRadius: '8px',
-                  border: '1px solid #e5e7eb',
-                  boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
-                  fontSize: '12px'
-                }}
-              />
+              
+              <Tooltip content={<CustomTooltip />} />
+              
+              {showAverage && average !== null && (
+                <ReferenceLine 
+                  y={average} 
+                  stroke={color} 
+                  strokeDasharray="3 3" 
+                  label={{ 
+                    value: "AVG", 
+                    position: "insideTopRight",
+                    fill: color,
+                    fontSize: 10
+                  }} 
+                />
+              )}
+              
               <Area
-                type="monotone"
+                type={smooth ? "monotone" : "linear"}
                 dataKey={dataKey}
                 stroke={color}
                 strokeWidth={3}
-                fill={`url(#colorGradient-${title.replace(/\s+/g, '')})`}
+                fill={showGradient ? `url(#premiumGradient-${title.replace(/\s+/g, '')})` : "none"}
                 animationDuration={1500}
                 animationEasing="ease-out"
+                dot={{ stroke: color, strokeWidth: 2, r: 4, fill: 'white' }}
+                activeDot={{ stroke: color, strokeWidth: 2, r: 6, fill: 'white' }}
               />
             </AreaChart>
           </ResponsiveContainer>
