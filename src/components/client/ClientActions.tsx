@@ -24,9 +24,26 @@ export const ClientRowActions: React.FC<{clientId: number | string}> = ({ client
     <>
       <ClientActionModal />
       <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} gap-2`}>
-        <ClientActionButton type="call" clientId={clientId} variant="outline" size={isMobile ? "default" : "sm"} className="w-full md:w-auto" />
-        <ClientActionButton type="schedule" clientId={clientId} variant="outline" size={isMobile ? "default" : "sm"} className="w-full md:w-auto" />
-        {!isMobile && <ClientActionButton type="view" clientId={clientId} variant="ghost" size="sm" />}
+        <ClientActionButton 
+          type="call" 
+          clientId={clientId} 
+          variant="outline" 
+          size={isMobile ? "default" : "sm"} 
+        />
+        <ClientActionButton 
+          type="schedule" 
+          clientId={clientId} 
+          variant="outline" 
+          size={isMobile ? "default" : "sm"} 
+        />
+        {!isMobile && (
+          <ClientActionButton 
+            type="view" 
+            clientId={clientId} 
+            variant="ghost" 
+            size="sm" 
+          />
+        )}
       </div>
     </>
   );
@@ -37,8 +54,16 @@ export const ClientCardActions: React.FC<{clientId: number | string}> = ({ clien
     <>
       <ClientActionModal />
       <div className="flex flex-wrap items-center gap-2">
-        <ClientActionButton type="contact" clientId={clientId} size="sm" />
-        <ClientActionButton type="schedule" clientId={clientId} variant="outline" size="sm" />
+        <ClientActionButton 
+          type="contact" 
+          clientId={clientId} 
+        />
+        <ClientActionButton 
+          type="schedule" 
+          clientId={clientId} 
+          variant="outline" 
+          size="sm" 
+        />
       </div>
     </>
   );
@@ -65,7 +90,10 @@ export const ClientDetailPanel: React.FC<{
             </div>
           </div>
           
-          <ClientActionButton type="contact" clientId={clientId} />
+          <ClientActionButton 
+            type="contact" 
+            clientId={clientId} 
+          />
         </div>
       </div>
     </>

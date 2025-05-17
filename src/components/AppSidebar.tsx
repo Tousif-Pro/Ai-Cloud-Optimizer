@@ -24,7 +24,8 @@ import {
   Zap, 
   UserSquare, 
   BrainCircuit,
-  Phone
+  Phone,
+  BrainCog
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -54,9 +55,10 @@ const menuItems = [
     icon: Users,
   },
   {
-    title: "Cloud Cost Optimizer",
+    title: "AI Cloud Optimizer",
     path: "/cloud-optimizer",
-    icon: Cloud, 
+    icon: BrainCog, 
+    highlight: true
   },
   {
     title: "Employee Development",

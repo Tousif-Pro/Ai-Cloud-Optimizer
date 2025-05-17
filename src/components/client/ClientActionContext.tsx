@@ -2,7 +2,7 @@
 import React, { createContext, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-type ClientActionType = 'call' | 'schedule' | 'view' | 'contact' | 'export' | 'filter' | 'add';
+export type ClientActionType = 'call' | 'schedule' | 'view' | 'contact' | 'export' | 'filter' | 'add';
 
 interface ClientActionContextProps {
   isModalOpen: boolean;

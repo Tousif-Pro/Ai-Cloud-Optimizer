@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CheckCircle2, Server, Database, HardDrive, Cloud, DollarSign, Zap, BarChart4, Award, RefreshCw } from "lucide-react";
+import { CheckCircle2, Server, Database, HardDrive, Cloud, DollarSign, Zap, BarChart4, Award, RefreshCw, BrainCog } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/hooks/use-toast";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CloudProvider {
   id: string;
@@ -438,6 +438,7 @@ const costRecommendations = [
 
 export default function CloudCostOptimizer() {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [selectedProvider, setSelectedProvider] = useState<string>("aws");
   const [selectedServiceType, setSelectedServiceType] = useState<string>("compute");
   const [selectedService, setSelectedService] = useState<string>("ec2");
@@ -520,29 +521,34 @@ export default function CloudCostOptimizer() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight gradient-text inline-block mb-2">
-          Cloud Cost Optimizer
-        </h1>
-        <p className="text-muted-foreground">
-          Analyze and optimize your cloud costs across major platforms
+      <div className="mb-8">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center shadow-lg">
+            <BrainCog className="h-5 w-5 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            AI Cloud Optimizer <span className="text-lg font-normal text-muted-foreground">(ACO)</span>
+          </h1>
+        </div>
+        <p className="text-muted-foreground mt-2">
+          Intelligent cloud cost management powered by AI optimization algorithms
         </p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
-        <Card className="md:col-span-2">
-          <CardHeader>
+        <Card className="md:col-span-2 border-green-100 dark:border-green-900/30 shadow-md">
+          <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-t-lg">
             <CardTitle className="flex items-center">
-              <Server className="h-5 w-5 text-blue-500 mr-2" />
+              <Server className="h-5 w-5 text-white mr-2" />
               Cloud Service Calculator
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-green-100">
               Estimate and compare cloud costs across providers and services
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <Tabs defaultValue={selectedProvider} onValueChange={setSelectedProvider}>
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
                 {cloudProviders.map(provider => (
                   <TabsTrigger key={provider.id} value={provider.id} className="flex items-center gap-2">
                     {provider.logo}
@@ -558,15 +564,15 @@ export default function CloudCostOptimizer() {
                       <Card 
                         key={serviceType.id} 
                         className={`cursor-pointer transition-all hover:shadow-md ${
-                          selectedServiceType === serviceType.id ? 'border-2 border-primary' : ''
+                          selectedServiceType === serviceType.id ? 'border-2 border-green-500 bg-green-50 dark:bg-green-900/20' : ''
                         }`}
                         onClick={() => setSelectedServiceType(serviceType.id)}
                       >
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm flex items-center">
-                            {serviceType.id === 'compute' && <Server className="h-4 w-4 mr-2" />}
-                            {serviceType.id === 'storage' && <HardDrive className="h-4 w-4 mr-2" />}
-                            {serviceType.id === 'database' && <Database className="h-4 w-4 mr-2" />}
+                            {serviceType.id === 'compute' && <Server className="h-4 w-4 mr-2 text-green-600" />}
+                            {serviceType.id === 'storage' && <HardDrive className="h-4 w-4 mr-2 text-green-600" />}
+                            {serviceType.id === 'database' && <Database className="h-4 w-4 mr-2 text-green-600" />}
                             {serviceType.name}
                           </CardTitle>
                         </CardHeader>
@@ -585,7 +591,7 @@ export default function CloudCostOptimizer() {
                         <Card 
                           key={service.id} 
                           className={`cursor-pointer transition-all hover:shadow-md ${
-                            selectedService === service.id ? 'border-2 border-primary' : ''
+                            selectedService === service.id ? 'border-2 border-green-500 bg-green-50 dark:bg-green-900/20' : ''
                           }`}
                           onClick={() => setSelectedService(service.id)}
                         >
@@ -601,7 +607,7 @@ export default function CloudCostOptimizer() {
                             <p className="text-xs text-muted-foreground">{service.description}</p>
                             <div className="flex flex-wrap gap-1">
                               {service.features.map((feature, index) => (
-                                <Badge key={index} variant="outline" className="text-xs">
+                                <Badge key={index} variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800">
                                   {feature}
                                 </Badge>
                               ))}
@@ -613,12 +619,12 @@ export default function CloudCostOptimizer() {
                   </div>
                   
                   {/* Resource Configuration */}
-                  <Card className="mt-4">
-                    <CardHeader>
-                      <CardTitle className="text-sm">Resource Configuration</CardTitle>
+                  <Card className="mt-4 border-green-100 dark:border-green-900/30 shadow-sm">
+                    <CardHeader className="bg-green-50 dark:bg-green-900/20">
+                      <CardTitle className="text-sm text-green-800 dark:text-green-300">Resource Configuration</CardTitle>
                       <CardDescription>Adjust your resource needs</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-4 pt-6">
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <Label htmlFor="compute-slider">Compute Units</Label>
@@ -631,6 +637,7 @@ export default function CloudCostOptimizer() {
                           step={1} 
                           value={[computeUnits]}
                           onValueChange={(value) => setComputeUnits(value[0])}
+                          className="[&>span:nth-child(2)]:bg-green-500"
                         />
                         {currentService && (
                           <div className="text-xs text-muted-foreground">
@@ -651,6 +658,7 @@ export default function CloudCostOptimizer() {
                           step={10} 
                           value={[storageGB]}
                           onValueChange={(value) => setStorageGB(value[0])}
+                          className="[&>span:nth-child(2)]:bg-green-500"
                         />
                         {currentService && (
                           <div className="text-xs text-muted-foreground">
@@ -671,6 +679,7 @@ export default function CloudCostOptimizer() {
                           step={1} 
                           value={[databaseInstances]}
                           onValueChange={(value) => setDatabaseInstances(value[0])}
+                          className="[&>span:nth-child(2)]:bg-green-500"
                         />
                         {currentService && (
                           <div className="text-xs text-muted-foreground">
@@ -679,13 +688,13 @@ export default function CloudCostOptimizer() {
                         )}
                       </div>
                     </CardContent>
-                    <CardFooter className="flex justify-between border-t pt-4">
+                    <CardFooter className="flex flex-col sm:flex-row sm:justify-between border-t pt-4 gap-4">
                       <div>
                         <p className="text-sm font-medium">Estimated Monthly Cost</p>
                         <p className="text-2xl font-bold">${monthlyEstimate.toFixed(2)}</p>
                         <p className="text-xs text-muted-foreground">${yearlyEstimate.toFixed(2)} annually</p>
                       </div>
-                      <Button onClick={handleOptimize} disabled={isOptimizing}>
+                      <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={handleOptimize} disabled={isOptimizing}>
                         {isOptimizing ? (
                           <>
                             <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -706,41 +715,41 @@ export default function CloudCostOptimizer() {
           </CardContent>
         </Card>
         
-        <Card className="md:row-span-2">
-          <CardHeader>
+        <Card className="md:row-span-2 border-green-100 dark:border-green-900/30 shadow-md">
+          <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-t-lg">
             <CardTitle className="flex items-center">
-              <DollarSign className="h-5 w-5 text-green-500 mr-2" />
+              <DollarSign className="h-5 w-5 text-white mr-2" />
               Cost Optimization
             </CardTitle>
-            <CardDescription>
-              Optimization recommendations and potential savings
+            <CardDescription className="text-green-100">
+              AI-powered recommendations and potential savings
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="rounded-lg border p-3 bg-green-50 dark:bg-green-900/20">
+          <CardContent className="space-y-4 pt-6">
+            <div className="rounded-lg border border-green-200 p-4 bg-green-50 dark:bg-green-900/20 dark:border-green-900">
               <div className="flex justify-between items-center mb-2">
-                <h4 className="font-medium text-sm">Potential Monthly Savings</h4>
-                <Badge variant="outline" className="bg-green-100 text-green-800">
+                <h4 className="font-medium text-green-800 dark:text-green-300">Potential Monthly Savings</h4>
+                <Badge className="bg-green-600 text-white">
                   {savings > 0 ? (savings / monthlyEstimate * 100).toFixed(0) : 0}% reduction
                 </Badge>
               </div>
               <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                 ${savings.toFixed(2)}
               </div>
-              <Progress value={(savings / monthlyEstimate) * 100} className="h-2 mt-2" />
+              <Progress value={(savings / monthlyEstimate) * 100} className="h-2 mt-2 bg-green-200" indicatorClassName="bg-green-600" />
             </div>
             
             <div>
-              <h4 className="font-medium text-sm mb-3">Optimization Recommendations</h4>
-              <ScrollArea className="h-96 rounded-md border p-2">
+              <h4 className="font-medium text-sm mb-3 text-green-800 dark:text-green-300">AI Optimization Recommendations</h4>
+              <ScrollArea className={`${isMobile ? "h-64" : "h-96"} rounded-md border p-2`}>
                 <div className="space-y-3">
                   {costRecommendations.map(rec => {
                     const isSelected = selectedRecommendations.includes(rec.id);
                     return (
                       <div 
                         key={rec.id}
-                        className={`p-3 rounded-lg border cursor-pointer hover:bg-accent/10 transition-colors ${
-                          isSelected ? 'border-primary bg-primary/5' : ''
+                        className={`p-3 rounded-lg border cursor-pointer hover:bg-green-50 dark:hover:bg-green-900/10 transition-colors ${
+                          isSelected ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''
                         }`}
                         onClick={() => toggleRecommendation(rec.id)}
                       >
@@ -749,13 +758,13 @@ export default function CloudCostOptimizer() {
                             {isSelected && <CheckCircle2 className="h-4 w-4 text-green-500 mr-1.5" />}
                             {rec.title}
                           </h5>
-                          <Badge>
+                          <Badge className="bg-green-600 text-white">
                             {rec.saving}
                           </Badge>
                         </div>
                         <p className="text-xs text-muted-foreground mb-2">{rec.description}</p>
                         <div className="flex justify-between text-xs">
-                          <Badge variant="outline" className="capitalize">
+                          <Badge variant="outline" className="capitalize bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800">
                             {rec.category}
                           </Badge>
                           <span className={`
@@ -774,11 +783,11 @@ export default function CloudCostOptimizer() {
           </CardContent>
           <CardFooter className="flex justify-between border-t pt-4">
             <div className="grid grid-cols-2 gap-2 w-full">
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full border-green-200 text-green-700 hover:bg-green-50 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-900/20">
                 <BarChart4 className="h-4 w-4 mr-2" />
                 Export Report
               </Button>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full border-green-200 text-green-700 hover:bg-green-50 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-900/20">
                 <Award className="h-4 w-4 mr-2" />
                 Best Practices
               </Button>
