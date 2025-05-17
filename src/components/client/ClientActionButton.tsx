@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useClientAction } from './ClientActionContext';
-import { Phone, CalendarCheck, FileText, Plus, Filter, Download } from 'lucide-react';
+import { Phone, CalendarCheck, FileText, Plus, Filter, Download, Contact } from 'lucide-react';
 
 type ClientActionType = 'call' | 'schedule' | 'view' | 'contact' | 'export' | 'filter' | 'add';
 
@@ -71,6 +71,14 @@ export const ClientActionButton: React.FC<ClientActionButtonProps & React.Button
   };
 
   const { icon, text } = getButtonContent();
+  
+  // Apply green background and white text for contact buttons
+  const getButtonStyle = () => {
+    if (type === 'contact') {
+      return "bg-green-600 hover:bg-green-700 text-white";
+    }
+    return "";
+  };
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -84,11 +92,11 @@ export const ClientActionButton: React.FC<ClientActionButtonProps & React.Button
 
   return (
     <Button
-      variant={variant}
+      variant={type === 'contact' ? 'default' : variant}
       size={size}
-      className={className}
-      {...props}
+      className={`${className} ${getButtonStyle()}`}
       onClick={handleClick}
+      {...props}
     >
       {icon}
       {text}

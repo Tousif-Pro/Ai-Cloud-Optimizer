@@ -16,6 +16,7 @@ import CloudCostOptimizer from "@/pages/CloudCostOptimizer";
 import EmployeeProductivity from "@/pages/EmployeeProductivity";
 import GrowthEngine from "@/pages/GrowthEngine";
 import ClientCRM from "@/pages/ClientCRM";
+import Contact from "@/pages/Contact";
 import { ClientActionProvider } from "@/components/client/ClientActionContext";
 
 // Configure React Query with better defaults for mobile
@@ -46,6 +47,7 @@ const App = () => (
                 <Route path="/employee-productivity" element={<EmployeeProductivity />} />
                 <Route path="/growth-engine" element={<GrowthEngine />} />
                 <Route path="/client-crm" element={<ClientCRM />} />
+                <Route path="/contact" element={<Contact />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>

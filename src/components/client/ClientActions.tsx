@@ -37,7 +37,7 @@ export const ClientCardActions: React.FC<{clientId: number | string}> = ({ clien
     <>
       <ClientActionModal />
       <div className="flex flex-wrap items-center gap-2">
-        <ClientActionButton type="contact" clientId={clientId} variant="default" size="sm" />
+        <ClientActionButton type="contact" clientId={clientId} size="sm" />
         <ClientActionButton type="schedule" clientId={clientId} variant="outline" size="sm" />
       </div>
     </>
@@ -65,7 +65,7 @@ export const ClientDetailPanel: React.FC<{
             </div>
           </div>
           
-          <ClientActionButton type="contact" clientId={clientId} variant="default" />
+          <ClientActionButton type="contact" clientId={clientId} />
         </div>
       </div>
     </>
