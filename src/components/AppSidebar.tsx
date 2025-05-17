@@ -23,9 +23,7 @@ import {
   Rocket, 
   Zap, 
   UserSquare, 
-  BrainCircuit,
-  Phone,
-  BrainCog
+  BrainCircuit 
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -55,10 +53,9 @@ const menuItems = [
     icon: Users,
   },
   {
-    title: "AI Cloud Optimizer",
+    title: "Cloud Cost Optimizer",
     path: "/cloud-optimizer",
-    icon: BrainCog, 
-    highlight: true
+    icon: Cloud, 
   },
   {
     title: "Employee Development",
@@ -81,11 +78,6 @@ const menuItems = [
     icon: Database,
   },
   {
-    title: "Contact",
-    path: "/contact",
-    icon: Phone,
-  },
-  {
     title: "Settings",
     path: "/settings",
     icon: Cog,
@@ -101,7 +93,7 @@ export function AppSidebar() {
       <SidebarHeader className="p-4">
         <div className="flex items-center space-x-2">
           <motion.div 
-            className="h-8 w-8 rounded-full bg-gradient-to-br from-green-500 via-green-600 to-emerald-700 flex items-center justify-center"
+            className="h-8 w-8 rounded-full bg-gradient-to-br from-evolve-blue-500 via-evolve-purple-500 to-evolve-teal-500 flex items-center justify-center"
             initial={{ rotate: -10 }}
             animate={{ rotate: 0 }}
             transition={{ duration: 0.5 }}
@@ -109,7 +101,7 @@ export function AppSidebar() {
             <BrainCircuit className="h-4 w-4 text-white" />
           </motion.div>
           <div className="font-bold text-xl text-sidebar-foreground">
-            <span className="text-green-500">Evolve</span>
+            <span className="text-evolve-purple-500">Evolve</span>
             <span className="text-white">OptimAI</span>
           </div>
         </div>

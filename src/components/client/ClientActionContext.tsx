@@ -1,8 +1,7 @@
 
 import React, { createContext, useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
 
-export type ClientActionType = 'call' | 'schedule' | 'view' | 'contact' | 'export' | 'filter' | 'add';
+type ClientActionType = 'call' | 'schedule' | 'view' | 'contact' | 'export' | 'filter' | 'add';
 
 interface ClientActionContextProps {
   isModalOpen: boolean;
@@ -18,15 +17,8 @@ export const ClientActionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [actionType, setActionType] = useState<ClientActionType | null>(null);
   const [clientId, setClientId] = useState<number | string | undefined>(undefined);
-  const navigate = useNavigate();
 
   const openModal = (type: ClientActionType, id?: number | string) => {
-    // Special handling for contact action to navigate to contact page
-    if (type === 'contact') {
-      navigate('/contact');
-      return;
-    }
-    
     setActionType(type);
     setClientId(id);
     setIsModalOpen(true);
