@@ -2,21 +2,23 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { motion } from "framer-motion";
 
-// Sample data
+// Sample data with premium colors
 const productData = [
-  { name: "AI Assistant", value: 85, color: "#1a237e" },
-  { name: "Data Platform", value: 72, color: "#4a148c" },
-  { name: "Analytics Suite", value: 78, color: "#006064" },
-  { name: "API Services", value: 63, color: "#0d47a1" },
+  { name: "AI Assistant", value: 85, color: "#9b87f5" },
+  { name: "Data Platform", value: 72, color: "#7E69AB" },
+  { name: "Analytics Suite", value: 78, color: "#6E59A5" },
+  { name: "API Services", value: 63, color: "#0EA5E9" },
 ];
 
 const customerSegmentData = [
-  { name: "Tech", value: 35, color: "#1a237e" },
-  { name: "Finance", value: 25, color: "#4a148c" },
-  { name: "Healthcare", value: 20, color: "#006064" },
-  { name: "Retail", value: 15, color: "#0d47a1" },
-  { name: "Other", value: 5, color: "#263238" },
+  { name: "Tech", value: 35, color: "#9b87f5" },
+  { name: "Finance", value: 25, color: "#7E69AB" },
+  { name: "Healthcare", value: 20, color: "#0EA5E9" },
+  { name: "Retail", value: 15, color: "#F97316" },
+  { name: "Other", value: 5, color: "#aaadb0" },
 ];
 
 const insights = [
@@ -54,11 +56,42 @@ const insights = [
   },
 ];
 
+// Custom tooltip for charts
+const CustomTooltip = ({ active, payload, label, valuePrefix, valueSuffix }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white p-3 rounded-lg shadow-xl border border-gray-100">
+        <p className="font-semibold">{label || payload[0].name}</p>
+        <p className="text-sm text-gray-700">
+          {valuePrefix || ""}{payload[0].value}{valueSuffix || ""}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
+// Helper function to render impact badge with appropriate color
+function getImpactBadge(impact: string) {
+  switch (impact) {
+    case "high":
+      return <Badge variant="outline" className="bg-red-100 text-red-800 border-red-200">High Impact</Badge>;
+    case "medium":
+      return <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">Medium Impact</Badge>;
+    case "low":
+      return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">Low Impact</Badge>;
+    default:
+      return <Badge variant="outline">{impact} Impact</Badge>;
+  }
+}
+
 export default function DataInsights() {
+  const isMobile = useIsMobile();
+  
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight gradient-text inline-block mb-2">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight gradient-text inline-block mb-2">
           Data Insights
         </h1>
         <p className="text-muted-foreground">
@@ -67,12 +100,12 @@ export default function DataInsights() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
+        <Card className="overflow-hidden shadow-lg border-none">
+          <CardHeader className="bg-gradient-to-r from-gray-50/50 to-gray-100/50 dark:from-gray-900/30 dark:to-gray-800/30">
             <CardTitle>Product Performance</CardTitle>
             <CardDescription>Customer satisfaction score by product</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4">
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
@@ -80,17 +113,46 @@ export default function DataInsights() {
                   margin={{
                     top: 20,
                     right: 30,
-                    left: 20,
+                    left: isMobile ? -15 : 20,
                     bottom: 5,
                   }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
-                  <XAxis dataKey="name" />
-                  <YAxis domain={[0, 100]} />
-                  <Tooltip formatter={(value) => [`${value}%`, 'Satisfaction']} />
-                  <Bar dataKey="value" name="Satisfaction Score">
+                  <defs>
                     {productData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <linearGradient key={index} id={`barGradient-${index}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={entry.color} stopOpacity={0.9}/>
+                        <stop offset="95%" stopColor={entry.color} stopOpacity={0.6}/>
+                      </linearGradient>
+                    ))}
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} vertical={false} />
+                  <XAxis 
+                    dataKey="name" 
+                    tick={{ fontSize: 11 }}
+                    tickLine={false}
+                    axisLine={{ stroke: '#e5e7eb', strokeWidth: 1 }}
+                  />
+                  <YAxis 
+                    domain={[0, 100]} 
+                    tick={{ fontSize: 11 }}
+                    tickLine={false}
+                    axisLine={false}
+                    width={30}
+                  />
+                  <Tooltip content={<CustomTooltip valueSuffix="%" />} />
+                  <Bar 
+                    dataKey="value" 
+                    name="Satisfaction Score"
+                    animationDuration={1500}
+                    radius={[4, 4, 0, 0]}
+                  >
+                    {productData.map((entry, index) => (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={`url(#barGradient-${index})`} 
+                        stroke={entry.color}
+                        strokeWidth={1}
+                      />
                     ))}
                   </Bar>
                 </BarChart>
@@ -99,12 +161,12 @@ export default function DataInsights() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card className="overflow-hidden shadow-lg border-none">
+          <CardHeader className="bg-gradient-to-r from-gray-50/50 to-gray-100/50 dark:from-gray-900/30 dark:to-gray-800/30">
             <CardTitle>Customer Segments</CardTitle>
             <CardDescription>Revenue distribution by industry</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4">
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -113,16 +175,24 @@ export default function DataInsights() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    outerRadius={80}
+                    outerRadius={isMobile ? 70 : 100}
+                    paddingAngle={4}
                     fill="#8884d8"
                     dataKey="value"
+                    animationDuration={1500}
+                    animationBegin={200}
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   >
                     {customerSegmentData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={entry.color}
+                        stroke="rgba(255,255,255,0.8)"
+                        strokeWidth={2}
+                      />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => [`${value}%`, 'Revenue Share']} />
+                  <Tooltip content={<CustomTooltip valueSuffix="%" />} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -130,8 +200,8 @@ export default function DataInsights() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
+      <Card className="overflow-hidden shadow-lg border-none">
+        <CardHeader className="bg-gradient-to-r from-gray-50/50 to-gray-100/50 dark:from-gray-900/30 dark:to-gray-800/30">
           <CardTitle>AI-Generated Business Insights</CardTitle>
           <CardDescription>
             Actionable insights derived from your business data
@@ -139,33 +209,28 @@ export default function DataInsights() {
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            {insights.map((insight) => (
-              <div key={insight.id} className="border-b pb-4 last:border-0 last:pb-0">
-                <div className="flex items-center justify-between mb-2">
+            {insights.map((insight, index) => (
+              <motion.div 
+                key={insight.id} 
+                className="border-b pb-4 last:border-0 last:pb-0"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
                   <h3 className="font-medium">{insight.title}</h3>
                   <div className="flex space-x-2">
                     <Badge variant="outline" className="capitalize">
                       {insight.category}
                     </Badge>
-                    <Badge 
-                      variant="outline" 
-                      className={
-                        insight.impact === "high" 
-                          ? "bg-red-100 text-red-800 border-red-200" 
-                          : insight.impact === "medium"
-                          ? "bg-amber-100 text-amber-800 border-amber-200"
-                          : "bg-green-100 text-green-800 border-green-200"
-                      }
-                    >
-                      {insight.impact} impact
-                    </Badge>
+                    {getImpactBadge(insight.impact)}
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground mb-2">{insight.description}</p>
                 <div className="bg-muted/30 p-2.5 rounded text-sm">
                   <span className="font-medium">Recommendation:</span> {insight.recommendation}
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </CardContent>

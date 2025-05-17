@@ -63,6 +63,29 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
+				// Premium chart colors based on the palette
+				"chart": {
+					"purple": {
+						primary: "#9b87f5",
+						secondary: "#7E69AB",
+						tertiary: "#6E59A5",
+					},
+					"blue": {
+						primary: "#0EA5E9",
+						secondary: "#1EAEDB",
+						tertiary: "#33C3F0",
+					},
+					"orange": {
+						primary: "#F97316",
+						secondary: "#FB923C",
+						tertiary: "#FDBA74",
+					},
+					"gray": {
+						primary: "#aaadb0",
+						secondary: "#d1d5db",
+						tertiary: "#e5e7eb",
+					}
+				},
 				// Custom theme colors
 				"evolve-blue": {
 					50: "#e3f2fd",
@@ -125,13 +148,22 @@ export default {
 					'100%': {
 						backgroundPosition: '0% 50%'
 					}
+				},
+				'floating': {
+					'0%, 100%': {
+						transform: 'translateY(0)'
+					},
+					'50%': {
+						transform: 'translateY(-8px)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'pulse-slow': 'pulse-slow 3s ease-in-out infinite',
-				'gradient-shift': 'gradient-shift 8s ease infinite'
+				'gradient-shift': 'gradient-shift 8s ease infinite',
+				'floating': 'floating 3s ease-in-out infinite'
 			},
 			backgroundImage: {
 				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

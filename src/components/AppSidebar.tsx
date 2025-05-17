@@ -26,6 +26,8 @@ import {
   BrainCircuit 
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { motion } from "framer-motion";
 
 // Menu items for the sidebar
 const menuItems = [
@@ -84,14 +86,20 @@ const menuItems = [
 
 export function AppSidebar() {
   const location = useLocation();
+  const isMobile = useIsMobile();
   
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
         <div className="flex items-center space-x-2">
-          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-evolve-blue-500 via-evolve-purple-500 to-evolve-teal-500 flex items-center justify-center">
+          <motion.div 
+            className="h-8 w-8 rounded-full bg-gradient-to-br from-evolve-blue-500 via-evolve-purple-500 to-evolve-teal-500 flex items-center justify-center"
+            initial={{ rotate: -10 }}
+            animate={{ rotate: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <BrainCircuit className="h-4 w-4 text-white" />
-          </div>
+          </motion.div>
           <div className="font-bold text-xl text-sidebar-foreground">
             <span className="text-evolve-purple-500">Evolve</span>
             <span className="text-white">OptimAI</span>
@@ -101,20 +109,20 @@ export function AppSidebar() {
       
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Main Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className={isMobile ? "sr-only" : ""}>Main Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {menuItems.map((item, index) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild
                     isActive={location.pathname === item.path}
-                    className={item.highlight ? "relative overflow-visible after:absolute after:-right-1 after:-top-1 after:h-2 after:w-2 after:rounded-full after:bg-green-500" : ""}
+                    className={`${item.highlight ? "relative overflow-visible after:absolute after:-right-1 after:-top-1 after:h-2 after:w-2 after:rounded-full after:bg-green-500" : ""} ${isMobile ? "justify-center" : ""}`}
                   >
-                    <Link to={item.path} className="flex items-center gap-3">
-                      <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
-                      {item.highlight && <Zap className="h-3 w-3 text-green-500 absolute right-2" />}
+                    <Link to={item.path} className={`flex items-center gap-3 ${isMobile ? "p-2" : ""}`}>
+                      <item.icon className={`${isMobile ? "h-5 w-5" : "h-5 w-5"}`} />
+                      {!isMobile && <span>{item.title}</span>}
+                      {!isMobile && item.highlight && <Zap className="h-3 w-3 text-green-500 absolute right-2" />}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -124,10 +132,10 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="px-4 py-4">
+      <SidebarFooter className={`px-4 py-4 ${isMobile ? "text-center" : ""}`}>
         <div className="flex flex-col space-y-2">
           <div className="text-xs text-sidebar-foreground/70">
-            Powered by AI • Version 2.0
+            {isMobile ? "v2.0" : "Powered by AI • Version 2.0"}
           </div>
         </div>
       </SidebarFooter>

@@ -17,29 +17,39 @@ import EmployeeProductivity from "@/pages/EmployeeProductivity";
 import GrowthEngine from "@/pages/GrowthEngine";
 import ClientCRM from "@/pages/ClientCRM";
 
-const queryClient = new QueryClient();
+// Configure React Query with better defaults for mobile
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
-      <TooltipProvider>
+      <TooltipProvider delayDuration={300}>
         <AppLayout>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/market-analysis" element={<MarketAnalysis />} />
-            <Route path="/resources" element={<ResourceAllocation />} />
-            <Route path="/trends" element={<TrendPredictions />} />
-            <Route path="/insights" element={<DataInsights />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/cloud-optimizer" element={<CloudCostOptimizer />} />
-            <Route path="/employee-productivity" element={<EmployeeProductivity />} />
-            <Route path="/growth-engine" element={<GrowthEngine />} />
-            <Route path="/client-crm" element={<ClientCRM />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <div className="max-w-[1920px] mx-auto">
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/market-analysis" element={<MarketAnalysis />} />
+              <Route path="/resources" element={<ResourceAllocation />} />
+              <Route path="/trends" element={<TrendPredictions />} />
+              <Route path="/insights" element={<DataInsights />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/cloud-optimizer" element={<CloudCostOptimizer />} />
+              <Route path="/employee-productivity" element={<EmployeeProductivity />} />
+              <Route path="/growth-engine" element={<GrowthEngine />} />
+              <Route path="/client-crm" element={<ClientCRM />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
         </AppLayout>
         <Toaster />
-        <Sonner />
+        <Sonner closeButton position="top-right" expand={false} />
       </TooltipProvider>
     </BrowserRouter>
   </QueryClientProvider>

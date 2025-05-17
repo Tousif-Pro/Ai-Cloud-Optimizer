@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 const MOBILE_BREAKPOINT = 768
@@ -6,13 +7,26 @@ export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
 
   React.useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
-    const onChange = () => {
+    const checkMobile = () => {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     }
-    mql.addEventListener("change", onChange)
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
-    return () => mql.removeEventListener("change", onChange)
+    
+    // Check on mount
+    checkMobile()
+    
+    // Setup resize listener with debounce
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
+    const handleResize = () => {
+      if (timeoutId) clearTimeout(timeoutId)
+      timeoutId = setTimeout(checkMobile, 150)
+    }
+    
+    window.addEventListener('resize', handleResize)
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
+      window.removeEventListener('resize', handleResize)
+    }
   }, [])
 
   return !!isMobile

@@ -10,6 +10,7 @@ import { AIInsightPanel } from "@/components/dashboard/AIInsightPanel";
 import { ClientSpotlight } from "@/components/dashboard/ClientSpotlight";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ClientStatus } from "@/types/client";
 
 // Sample data for charts
 const revenueData = [
@@ -69,10 +70,10 @@ const competitors = [
 ];
 
 const resourceAllocationData = [
-  { name: "R&D", value: 40, color: "#1a237e" },
-  { name: "Marketing", value: 25, color: "#4a148c" },
-  { name: "Operations", value: 20, color: "#006064" },
-  { name: "Admin", value: 15, color: "#0d47a1" },
+  { name: "R&D", value: 40, color: "#9b87f5" },
+  { name: "Marketing", value: 25, color: "#7E69AB" },
+  { name: "Operations", value: 20, color: "#F97316" },
+  { name: "Admin", value: 15, color: "#0EA5E9" },
 ];
 
 const trendData = [
@@ -102,7 +103,7 @@ const trendData = [
   },
 ];
 
-// Featured clients data
+// Featured clients data with proper ClientStatus type
 const featuredClients = [
   {
     id: 1,
@@ -110,7 +111,7 @@ const featuredClients = [
     logo: "🏢",
     industry: "Enterprise Software",
     revenue: "$3.2M",
-    status: "growing",
+    status: "growing" as ClientStatus,
     lastInteraction: "2 days ago",
     satisfaction: 92,
     upcoming: {
@@ -125,7 +126,7 @@ const featuredClients = [
     logo: "🏥",
     industry: "Healthcare",
     revenue: "$1.8M",
-    status: "stable",
+    status: "stable" as ClientStatus,
     lastInteraction: "1 week ago",
     satisfaction: 86,
     upcoming: {
@@ -140,7 +141,7 @@ const featuredClients = [
     logo: "🚚",
     industry: "Transportation",
     revenue: "$2.4M",
-    status: "at risk",
+    status: "at risk" as ClientStatus,
     lastInteraction: "3 weeks ago",
     satisfaction: 71,
     upcoming: {
@@ -161,9 +162,9 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight gradient-text inline-block mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight gradient-text inline-block mb-2">
             Business Evolution Dashboard
           </h1>
           <p className="text-muted-foreground">
@@ -172,7 +173,7 @@ export default function Dashboard() {
         </div>
         <Button 
           onClick={handleGenerateInsights}
-          className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+          className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white w-full sm:w-auto"
         >
           <BrainCircuit className="mr-2 h-4 w-4" />
           Generate AI Insights
@@ -217,13 +218,13 @@ export default function Dashboard() {
           title="Revenue Growth"
           data={revenueData}
           dataKey="value"
-          color="#1a237e"
+          color="#9b87f5"
         />
         <MetricChart
           title="Customer Acquisition"
           data={acquisitionData}
           dataKey="value"
-          color="#4a148c"
+          color="#7E69AB"
         />
       </div>
 
